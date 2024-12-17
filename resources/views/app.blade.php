@@ -9,7 +9,7 @@
   @routes
   @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
   @endif
 
   @inertiaHead

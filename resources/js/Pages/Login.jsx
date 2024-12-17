@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {Link} from "@inertiajs/react";
 import {route} from "ziggy-js";
-import {handleInput} from "concurrently/dist/src/defaults";
 
 const Login = () => {
   const [progress, setProgress] = useState(0);
@@ -36,11 +35,11 @@ const Login = () => {
     setProgress(((step - 1) / 2) * 100)
   }
 
-  function connectToGradebook(event: any) {
+  function connectToGradebook(event) {
     event.preventDefault();
   }
 
-  function handleFormInput(event: any) {
+  function handleFormInput(event) {
 
   }
 
