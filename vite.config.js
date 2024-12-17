@@ -1,18 +1,18 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
-import react from '@vitejs/plugin-react';
+import {svelte} from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
   plugins: [
     laravel({
-      input: ['resources/css/app.css', 'resources/js/app.jsx'],
+      input: ['resources/css/app.css', 'resources/js/app.js'],
       refresh: true,
     }),
-    react()
+    svelte()
   ],
   resolve: {
     alias: {
-      '@': '/resources/js',
+      '$lib': '/resources/js',
       'ziggy-js': '/vendor/tightenco/ziggy'
     },
   },

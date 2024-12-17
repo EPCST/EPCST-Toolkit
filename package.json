@@ -7,6 +7,7 @@
     "dev": "vite"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.2",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.4",
     "concurrently": "^9.0.1",
@@ -17,11 +18,14 @@
   },
   "dependencies": {
     "@inertiajs/react": "2.0",
+    "@inertiajs/svelte": "^2.0.0",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
     "preline": "^2.6.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "svelte": "^5.14.1",
+    "sweetalert2": "^11.15.2"
   }
 }
