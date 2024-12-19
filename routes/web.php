@@ -21,7 +21,7 @@ Route::post('/', function(Request $request) {
   User::create($formFields);
 })->name('register');
 
-Route::post('/user/{user}', function(User $user) {
+Route::delete('/user/{user}', function(User $user) {
   $user->delete();
 
   return redirect()->route('home');

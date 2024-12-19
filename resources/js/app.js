@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/svelte'
 import { mount } from 'svelte'
+import 'preline';
 
 createInertiaApp({
   resolve: name => {
