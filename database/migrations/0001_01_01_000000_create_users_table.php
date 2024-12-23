@@ -12,9 +12,12 @@ return new class extends Migration {
   {
     Schema::create('users', function (Blueprint $table) {
       $table->bigInteger('id');
+      $table->integer('role')->nullable();
       $table->string('first_name');
       $table->string('middle_name')->nullable();
       $table->string('last_name')->nullable();
+      $table->string('department')->nullable();
+      $table->String('username')->unique();
       $table->string('api_token');
       $table->string('email')->unique();
       $table->timestamp('email_verified_at')->nullable();

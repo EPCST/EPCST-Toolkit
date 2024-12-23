@@ -1,5 +1,5 @@
 <script>
-  import { router, useForm } from '@inertiajs/svelte'
+  import {Link, router, useForm} from '@inertiajs/svelte'
   import { route } from 'ziggy-js';
 
   const form = useForm({
@@ -38,6 +38,8 @@
 
   <button disabled={$form.processing}>Register</button>
 </form>
+
+<Link href={route('logout')}>Logout</Link>
 
 <ul>
 {#each users as user}
