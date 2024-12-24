@@ -13,8 +13,12 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function(){
   Route::get('/dashboard', function(Request $request) {
-    return inertia('Sample');
+    return inertia('Dashboard');
   })->name('dashboard');
+
+  Route::get('/sections', function(Request $request) {
+    return inertia('Sections');
+  })->name('sections.index');
 
   Route::get('/logout', function(Request $request) {
     Auth::logout();

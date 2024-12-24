@@ -1,12 +1,8 @@
 <script>
   import { useForm } from "@inertiajs/svelte";
   import { Button } from "$lib/components/ui/button/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
-  import { Label } from "$lib/components/ui/label/index.js";
   import logo from "$lib/static/ic_launcher.png";
   import Reload from "svelte-radix/Reload.svelte";
-  import * as Card from "$lib/components/ui/card/index.js";
-  import * as Tabs from "$lib/components/ui/tabs/index.js";
 
   const form = useForm({
     username: null,
@@ -35,7 +31,7 @@
 
       <div class="p-5 flex flex-col bg-white shadow rounded-2xl dark:bg-neutral-900">
         <div class="text-center mb-8">
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Setup</h1>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">Login</h1>
           <p class="mt-1 text-sm text-gray-500 dark:text-neutral-500">Enter your username and password used in the grade book system</p>
         </div>
 
@@ -66,7 +62,6 @@
                   Connect
                 {/if}
               </Button>
-
             </div>
           </div>
         </form>
