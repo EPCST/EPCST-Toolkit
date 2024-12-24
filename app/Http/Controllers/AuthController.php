@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Native\Laravel\Facades\Notification;
 
 class AuthController extends Controller {
   private string $baseUrl = 'https://gradebook.epcst.edu.ph/api';
@@ -24,10 +25,13 @@ class AuthController extends Controller {
     try {
       $userExists = User::where('username', $formFields['username'])->count() > 0;
       if($userExists) {
-        return Auth::attempt($formFields) ?
-          redirect()->route('login')->withErrors([
-            'username' => 'Invalid username or password.'
-          ]) : redirect()->route('dashboard');
+        if(Auth::attempt($formFields)) {
+          return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('login')->withErrors([
+          'username' => 'Invalid username or password.'
+        ]);
       }
 
       $response = Http::withHeaders([

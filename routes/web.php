@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SubjectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
 
 Route::redirect('/', '/login')->name('home');
 Route::middleware('guest')->group(function () {
@@ -16,9 +18,10 @@ Route::middleware('auth')->group(function(){
     return inertia('Dashboard');
   })->name('dashboard');
 
-  Route::get('/sections', function(Request $request) {
-    return inertia('Sections');
-  })->name('sections.index');
+  Route::group(['prefix' => 'subjects'], function(){
+    Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
+    Route::get('/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
+  });
 
   Route::get('/logout', function(Request $request) {
     Auth::logout();

@@ -2,13 +2,8 @@
 import logo from "$lib/static/ic_launcher.png";
 import {inertia, Link, page} from '@inertiajs/svelte';
 import * as Tooltip from "$lib/components/ui/tooltip/index.js";
-import * as Sheet from "$lib/components/ui/sheet/index.js";
-import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-import * as Card from '$lib/components/ui/card/index.js';
-import * as Tabs from '$lib/components/ui/tabs/index.js';
-import * as Table from '$lib/components/ui/table/index.js';
-import * as Pagination from '$lib/components/ui/pagination/index.js';
+import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
 
 import {Book, ChartLine, UsersRound, Settings, Package, House} from "lucide-svelte";
 import {Button} from "$lib/components/ui/button/index.js";
@@ -16,18 +11,32 @@ import {Button} from "$lib/components/ui/button/index.js";
 
 <aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
   <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
-    <a
-      href="#"
-      class="text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base"
-    >
-      <img alt="EPCST Toolkit Logo" src={logo} class="h-8 w-8 transition-all group-hover:scale-110" />
-      <span class="sr-only">EPCST Toolkit</span>
-    </a>
+    <AlertDialog.Root>
+      <AlertDialog.Trigger asChild let:builder>
+        <div {...builder} use:builder.action class="text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base">
+          <img alt="EPCST Toolkit Logo" src={logo} class="h-8 w-8 transition-all group-hover:scale-110" />
+          <span class="sr-only">EPCST Toolkit</span>  
+        </div>
+      </AlertDialog.Trigger>
+      <AlertDialog.Content class="gap-0">
+        <div class="flex justify-end">
+          <AlertDialog.Cancel>X</AlertDialog.Cancel>
+        </div>
+        <div class="flex flex-col justify-center items-center">
+          <img src={logo} alt="EPCST Toolkit Logo" width={48} />
+          <h1 class="font-bold text-xl">EPCST Toolkit</h1>
+          <p class="text-muted-foreground text-sm">This system was made in an effort to make reporting easier for teachers.</p>
+
+          <p class="text-muted-foreground text-xs mt-4">Version <b>{$page.props.app.version}</b></p>
+          <p class="text-muted-foreground text-xs">Made by the CS Department</p>
+        </div> 
+      </AlertDialog.Content>
+    </AlertDialog.Root>
     <Tooltip.Root>
       <Tooltip.Trigger asChild let:builder>
         <a
           href="{route('dashboard')}"
-          class="{route().current('dashboard') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
+          class="{$page.url === '/dashboard' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
           use:builder.action
           {...builder}
           use:inertia
@@ -42,13 +51,13 @@ import {Button} from "$lib/components/ui/button/index.js";
       <Tooltip.Trigger asChild let:builder>
         <a
           {...builder}
-          class="{route().current('sections.index') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          href={route('sections.index')}
+          class="{$page.url.indexOf('/subjects') !== -1 ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
+          href={route('subjects.index')}
           use:builder.action
           use:inertia
         >
           <Book class="h-5 w-5" />
-          <span class="sr-only">Sections</span>
+          <span class="sr-only">Subjects</span>
         </a>
       </Tooltip.Trigger>
       <Tooltip.Content side="right">Sections</Tooltip.Content>
@@ -123,14 +132,15 @@ import {Button} from "$lib/components/ui/button/index.js";
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end">
-        <DropdownMenu.Label>My Account</DropdownMenu.Label>
+        <DropdownMenu.Label>
+          <p>{$page.props.auth.user.first_name} {$page.props.auth.user.last_name}</p>
+          <p class="text-muted-foreground text-xs">Teacher</p>
+        </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Item>Settings</DropdownMenu.Item>
         <DropdownMenu.Item>Support</DropdownMenu.Item>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item>
-          <Link href={route('logout')}>Logout</Link>
-        </DropdownMenu.Item>
+        <DropdownMenu.Item href={route('logout')} class="cursor-pointer">Logout</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   </nav>

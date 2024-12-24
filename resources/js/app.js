@@ -11,7 +11,5 @@ createInertiaApp({
     mount(App, {target: el, props})
   },
 }).then(r => {
-  if(r) {
-    console.log(r);
-  }
+  window.HSStaticMethods.autoInit();
 })

@@ -9,8 +9,6 @@
     password: null,
   });
 
-  let { errors } = $props();
-
   function loginToGradebook(e) {
     e.preventDefault();
     $form.clearErrors();

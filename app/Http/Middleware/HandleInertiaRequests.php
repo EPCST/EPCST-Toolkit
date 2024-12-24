@@ -37,7 +37,10 @@ class HandleInertiaRequests extends Middleware
     return array_merge(parent::share($request), [
       'auth.user' => fn () => $request->user()
         ? $request->user()->only('id', 'first_name', 'last_name', 'email', 'token', 'username', 'department', 'role')
-        : null
+        : null,
+      'app' => [
+        'version' => env('NATIVEPHP_APP_VERSION', '1.0.0')
+      ]
     ]);
   }
 }
