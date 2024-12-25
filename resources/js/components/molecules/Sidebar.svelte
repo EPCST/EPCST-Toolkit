@@ -4,6 +4,7 @@ import {inertia, Link, page} from '@inertiajs/svelte';
 import * as Tooltip from "$lib/components/ui/tooltip/index.js";
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
+import * as HoverCard from "$lib/components/ui/hover-card/index.js";
 
 import {Book, ChartLine, UsersRound, Settings, Package, House} from "lucide-svelte";
 import {Button} from "$lib/components/ui/button/index.js";
@@ -13,7 +14,7 @@ import {Button} from "$lib/components/ui/button/index.js";
   <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
     <AlertDialog.Root>
       <AlertDialog.Trigger asChild let:builder>
-        <div {...builder} use:builder.action class="text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base">
+        <div {...builder} use:builder.action class="cursor-pointer text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base">
           <img alt="EPCST Toolkit Logo" src={logo} class="h-8 w-8 transition-all group-hover:scale-110" />
           <span class="sr-only">EPCST Toolkit</span>  
         </div>
@@ -28,7 +29,16 @@ import {Button} from "$lib/components/ui/button/index.js";
           <p class="text-muted-foreground text-sm">This system was made in an effort to make reporting easier for teachers.</p>
 
           <p class="text-muted-foreground text-xs mt-4">Version <b>{$page.props.app.version}</b></p>
-          <p class="text-muted-foreground text-xs">Made by the CS Department</p>
+          <p class="text-muted-foreground text-xs">
+            Made by the
+            <HoverCard.Root>
+              <HoverCard.Trigger class="text-orange-500">CS Department</HoverCard.Trigger>
+              <HoverCard.Content class="flex gap-2 flex-col">
+                <p>Led by <b>Joseph G. Chua</b></p>
+                <p>Many thanks to the entire CS department faculty for testing and providing feedback.</p>
+              </HoverCard.Content>
+            </HoverCard.Root>
+          </p>
         </div> 
       </AlertDialog.Content>
     </AlertDialog.Root>

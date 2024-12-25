@@ -1,6 +1,7 @@
 <script module>
   export { default as layout } from '$lib/components/molecules/Layout.svelte'
 </script>
+
 <script>
   import { page } from '@inertiajs/svelte';
   
