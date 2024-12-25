@@ -24,12 +24,12 @@ class SubjectController extends Controller
         ->json();
 
       // Need to refresh the token, use their credentials.
-      if (isset($response['message']) && $response['message'] === 'Unauthenticated') {
+      if(isset($response['message']) && $response['message'] === 'Unauthenticated') {
         // Todo: implement refresh
       }
 
       foreach ($response['data'] as $subject) {
-        Subject::query()->create([
+        Subject::createOrFirst([
           'title' => $subject['title'],
           'section' => $subject['section_name'],
           'subject_id' => $subject['id'],
@@ -87,6 +87,7 @@ class SubjectController extends Controller
 
       // Attach all students to subject in one query
       $studentIds = Student::whereIn('student_no', $students->pluck('student_no'))->pluck('id');
+      // TODO: [Logic] I need to understand why exactly this works. AI made this.
       $subject->students()->sync(
         collect($studentIds)->mapWithKeys(function ($id) use ($subject) {
           return [$id => [

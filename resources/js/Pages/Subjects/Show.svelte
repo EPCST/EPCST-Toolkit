@@ -9,7 +9,8 @@
 </script>
 
 <div class="flex flex-col sm:gap-4 sm:pl-14 m-4">
-  <h1>Show Subject: {$page.props.subject}</h1>
-
+  <Link href={route('subjects.index')}>Back</Link>
+  <h1>Show Subject: {$page.props.subject.title}</h1>
+  
   <Link class="h-7 gap-1 text-sm" href={$page.url + '/fetch'} only={['students']}>Fetch</Link>
 </div>
