@@ -20,7 +20,9 @@ Route::middleware('auth')->group(function(){
 
   Route::group(['prefix' => 'subjects'], function(){
     Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
+    Route::get('/fetch', [SubjectController::class, 'fetchSubjects'])->name('subjects.fetchSubjects');
     Route::get('/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
+    Route::get('/{subject}/fetch', [SubjectController::class, 'fetchStudents'])->name('subjects.fetchStudents');
   });
 
   Route::get('/logout', function(Request $request) {

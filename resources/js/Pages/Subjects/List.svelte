@@ -32,6 +32,8 @@
     window.HSStaticMethods.autoInit();
   });
 
+  const { subjects } = $props();
+
   /**
    * View a subject
    *
@@ -40,11 +42,27 @@
   function viewSubject(subjectId) {
     router.visit(`/subjects/${subjectId}`);
   }
+
+  function fetchSubjects(e) {
+    router.get(route('subjects.fetchSubjects'), {
+      onFinish: () => {
+        e.target.disabled = false;
+      }
+    });
+  }
 </script>
 
 <div class="flex flex-col sm:gap-4 sm:pl-14 m-4">
-  <h1 class="font-bold text-2xl">My Classes</h1>
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-2xl">My Classes</h1>
+    <Button class="h-7 gap-1 text-sm" onclick={(e) => {
+      e.preventDefault();
+      e.target.disabled = true;
+      fetchSubjects(e);
+    }}>Fetch Subjects</Button>
+  </div>
   <div class="hs-accordion-group">
+    {#each Object.entries(subjects) as [subject, sections]}
     <div class="hs-accordion bg-white border -mt-px">
       <button
         class="hs-accordion-toggle hs-accordion-active:text-blue-600 inline-flex items-center gap-x-3 w-full font-semibold text-start text-gray-800 py-4 px-5 hover:text-gray-500 disabled:opacity-50 disabled:pointer-events-none"
@@ -60,7 +78,7 @@
              stroke-linejoin="round">
           <path d="M5 12h14"></path>
         </svg>
-        Cybersecurity
+        {subject}
       </button>
       <div class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" role="region">
         <TableRoot>
@@ -72,11 +90,12 @@
             </TableRow>
           </TableHeader>
           <TableBody>
+            {#each sections as section}
             <TableRow>
-              <TableCell><b>IT 201</b></TableCell>
-              <TableCell>0</TableCell>
+              <TableCell><b>{section['section']}</b></TableCell>
+              <TableCell>{section['students'].length}</TableCell>
               <TableCell class="text-right flex justify-end items-center gap-2">
-                <Button onclick={() => viewSubject(1)} variant="outline" size="icon"
+                <Button onclick={() => viewSubject(section['id'])} variant="outline" size="icon"
                         class="bg-blue-600 hover:bg-blue-700 text-white hover:text-white">
                   <Eye size={16} class="w-auto"/>
                 </Button>
@@ -98,9 +117,11 @@
                 </DropdownMenu>
               </TableCell>
             </TableRow>
+            {/each}
           </TableBody>
         </TableRoot>
       </div>
     </div>
+    {/each}
   </div>
 </div>

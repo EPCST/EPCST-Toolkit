@@ -3,7 +3,7 @@
 </script>
 
 <script>
-  import { Link } from '@inertiajs/svelte';
+  import { page, Link } from '@inertiajs/svelte';
 
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
@@ -33,7 +33,7 @@
         <Card.Root>
           <Card.Content>
             <Card.Description>My Classes</Card.Description>
-            <Card.Title class="text-4xl">0</Card.Title>
+            <Card.Title class="text-2xl">0</Card.Title>
           </Card.Content>
           <Card.Footer>
             <Link href={route('subjects.index')} class="text-xs hover:text-blue-700 text-blue-600">View All Subjects</Link>
@@ -41,13 +41,31 @@
         </Card.Root>
         <Card.Root>
           <Card.Content>
-            <Card.Description>Classes Today</Card.Description>
-            <Card.Title class="text-4xl">0</Card.Title>
+            <Card.Description>Last Sync</Card.Description>
+            <Card.Title class="text-2xl">3 hours ago</Card.Title>
           </Card.Content>
           <Card.Footer>
-            <Link href={route('subjects.index')} class="text-xs text-muted-foreground">View All Subjects</Link>
+            <Button size="sm" variant="outline" class="h-7 gap-1 text-sm">Sync</Button>
           </Card.Footer>
         </Card.Root>
+        <!-- <Card.Root class="col-span-2 outline-red-400 outline">
+          <Card.Content>
+            <Card.Description>System Status</Card.Description>
+            <Card.Title class="text-red-600">
+              <h1>Setup Incomplete</h1>
+            </Card.Title>
+            <p class="text-xs text-muted-foreground">Current Version: {$page.props.app.version}</p>
+          </Card.Content>
+        </Card.Root> -->
+        <!-- <Card.Root>
+          <Card.Content>
+            <Card.Description>Current Version</Card.Description>
+            <Card.Title class="text-2xl">v0.0.5</Card.Title>
+          </Card.Content>
+          <Card.Footer>
+            <Button size="sm" variant="outline" class="h-7 gap-1 text-sm">Sync</Button>
+          </Card.Footer>
+        </Card.Root> -->
       </div>
       <Tabs.Root value="week">
         <div class="flex items-center">
