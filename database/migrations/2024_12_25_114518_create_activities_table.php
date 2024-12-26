@@ -15,6 +15,8 @@ return new class extends Migration {
       $table->string('period');
       $table->integer('academic_year_id');
       $table->enum('type', ['activity', 'quiz', 'prelim', 'midterm', 'final']);
+      $table->string('title');
+      $table->text('description')->nullable();
       $table->float('points', 1);
       $table->dateTime('due_date');
       $table->timestamps();

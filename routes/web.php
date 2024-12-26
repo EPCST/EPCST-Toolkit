@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubjectController;
 use Illuminate\Http\Request;
@@ -22,6 +23,11 @@ Route::middleware('auth')->group(function(){
     Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
     Route::get('/fetch', [SubjectController::class, 'fetchSubjects'])->name('subjects.fetchSubjects');
     Route::get('/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
+    Route::get('/{subject}/activities', [ActivityController::class, 'index'])->name('subjects.activities.index');
+    Route::get('/{subject}/activities/create', [ActivityController::class, 'create'])->name('subjects.activities.create');
+    Route::post('/{subject}/activities/create', [ActivityController::class, 'store'])->name('subjects.activities.store');
+    Route::get('/{subject}/activities/{activity}', [ActivityController::class, 'show'])->name('subjects.activities.show');
+    Route::post('/{subject}/activities/{activity}', [ActivityController::class, 'update'])->name('subjects.activities.update');
     Route::get('/{subject}/fetch', [SubjectController::class, 'fetchStudents'])->name('subjects.fetchStudents');
   });
 
