@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Activity extends Model {
   protected $guarded = [];
 
+  protected $with = ['students'];
+
+  protected function casts(): array
+  {
+    return [
+      'due_date' => 'datetime:M d, Y',
+    ];
+  }
+
   public function subject(): BelongsTo {
     return $this->belongsTo(Subject::class);
   }

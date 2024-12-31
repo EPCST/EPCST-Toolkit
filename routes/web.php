@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SubjectController;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -16,13 +18,20 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function(){
   Route::get('/dashboard', function(Request $request) {
-    return inertia('Dashboard');
+    return inertia('Dashboard', [
+      'subjectCount' => Subject::count()
+    ]);
   })->name('dashboard');
 
   Route::group(['prefix' => 'subjects'], function(){
     Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
     Route::get('/fetch', [SubjectController::class, 'fetchSubjects'])->name('subjects.fetchSubjects');
     Route::get('/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
+    Route::get('/{subject}/attendances', [AttendanceController::class, 'index'])->name('subjects.attendances.index');
+    Route::get('/{subject}/attendances/create', [AttendanceController::class, 'create'])->name('subjects.attendances.index');
+    Route::post('/{subject}/attendances/create', [AttendanceController::class, 'store'])->name('subjects.attendances.store');
+    Route::get('/{subject}/attendances/{attendance}', [AttendanceController::class, 'show'])->name('subjects.attendances.show');
+    Route::post('/{subject}/attendances/{attendance}', [AttendanceController::class, 'update'])->name('subjects.attendances.update');
     Route::get('/{subject}/activities', [ActivityController::class, 'index'])->name('subjects.activities.index');
     Route::get('/{subject}/activities/create', [ActivityController::class, 'create'])->name('subjects.activities.create');
     Route::post('/{subject}/activities/create', [ActivityController::class, 'store'])->name('subjects.activities.store');

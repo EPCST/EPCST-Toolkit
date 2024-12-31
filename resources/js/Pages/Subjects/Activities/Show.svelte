@@ -1,11 +1,12 @@
 <script module>
-  export { default as layout } from '$lib/components/molecules/Layout.svelte'
+  export {default as layout} from '$lib/components/molecules/Layout.svelte'
 </script>
 
 <script>
   import {inertia, Link, page, router, useForm} from '@inertiajs/svelte';
 
-  import { Button } from "$lib/components/ui/button/index.js";
+  import {Button} from "$lib/components/ui/button/index.js";
+  import {ChevronLeft} from "lucide-svelte";
 
 
   const form = useForm({
@@ -27,6 +28,6 @@
   console.log($page);
 </script>
 
-<div class="flex flex-col sm:gap-4 sm:pl-14 m-4">
-  asd
+<div class="flex flex-col sm:gap-4 sm:pl-14">
+
 </div>

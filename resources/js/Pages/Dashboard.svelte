@@ -33,7 +33,7 @@
         <Card.Root>
           <Card.Content>
             <Card.Description>My Classes</Card.Description>
-            <Card.Title class="text-2xl">0</Card.Title>
+            <Card.Title class="text-2xl">{$page.props.subjectCount}</Card.Title>
           </Card.Content>
           <Card.Footer>
             <Link href={route('subjects.index')} class="text-xs hover:text-blue-700 text-blue-600">View All Subjects</Link>

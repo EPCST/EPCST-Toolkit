@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 class ActivityController extends Controller {
   public function index(Subject $subject) {
-    $activities = $subject->activities;
+    $activities = $subject->activities->groupBy('type');
 
     return Inertia::render('Subjects/Activities/List', [
       'subject' => $subject,
