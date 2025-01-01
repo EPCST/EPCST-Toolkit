@@ -11,40 +11,38 @@
   import {Input} from "$lib/components/ui/input/index.js";
   import {Label} from "$lib/components/ui/label/index.js";
 
-  const { activity, subject, students } = $props();
+  const { type, subject, students } = $props();
 
   let studentsScores = {};
   for(let [key, student] of Object.entries(students)) {
     studentsScores[key] = {
       id: student.id,
-      score: student.score ?? '',
-      remarks: student.pivot.remarks ?? ''
+      score: '',
+      remarks: ''
     }
   }
 
   const form = useForm({
-    title: activity.title,
-    points: activity.points,
-    due_date: new Date(activity.due_date).toISOString().slice(0,16),
+    type: type,
+    title: '',
+    subject_id: subject.id,
+    period: $page.props.app.settings.period,
+    academic_year_id: Number($page.props.app.settings.academic_year),
+    points: 0,
+    due_date: '',
     studentsScores: studentsScores
   });
-
-  function submitForm(e) {
-    e.preventDefault();
-
-    $form.post($page.url + '/activities/create');
-  }
 
   function save(e) {
     e.preventDefault();
 
-    $form.post(route('subjects.activities.update', {subject: subject.id, activity: activity.id}), {
+    $form.post(route('subjects.activities.store', {subject: subject.id}), {
       preserveScroll: true,
       onSuccess: () => {
-        toast.success("Activity saved successfully", {
-          position: 'top-right',
-          description: 'All changes to activity has been saved successfully.'
+        toast.success("Activity created successfully", {
+          position: 'top-right'
         });
+        router.get(route('subjects.activities.index', {subject: subject.id}), {}, { replace: true })
       }
     });
   }
@@ -56,14 +54,17 @@
       <div class="grid w-full items-center gap-1.5">
         <Label for="title">Title</Label>
         <Input type="text" bind:value={$form.title} id="title" placeholder="Title" />
+        {#if $form.errors.title}<small class="text-xs text-red-400">{$form.errors.title}</small>{/if}
       </div>
       <div class="grid w-full items-center gap-1.5">
         <Label for="due_date">Due Date</Label>
         <Input type="datetime-local" bind:value={$form.due_date} id="due_date" />
+        {#if $form.errors.due_date}<small class="text-xs text-red-400">{$form.errors.due_date}</small>{/if}
       </div>
       <div class="grid w-full items-center gap-1.5">
         <Label for="points">Points</Label>
         <Input type="number" bind:value={$form.points} id="points" min="0" />
+        {#if $form.errors.points}<small class="text-xs text-red-400">{$form.errors.points}</small>{/if}
       </div>
     </div>
     <div class="bg-gray-50 shadow-md rounded-md text-xs">
@@ -84,7 +85,7 @@
               <input type="number" bind:value={$form.studentsScores[key]['score']} class="w-full focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none" placeholder="out of {$form.points}">
             </td>
             <td class="border border-gray-400 text-center">
-              <input type="text" bind:value={$form.studentsScores[key]['remarks']} class="focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none" placeholder="Remarks..." tabindex="-1">
+              <input type="text" class="focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none" placeholder="Remarks..." tabindex="-1">
             </td>
           </tr>
           {/each}

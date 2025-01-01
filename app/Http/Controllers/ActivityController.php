@@ -7,10 +7,11 @@ use App\Models\ActivityStudent;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Native\Laravel\Facades\Settings;
 
 class ActivityController extends Controller {
   public function index(Subject $subject) {
-    $activities = $subject->activities->groupBy('type');
+    $activities = $subject->activities->where('period', Settings::get('period'))->groupBy('type');
 
     return Inertia::render('Subjects/Activities/List', [
       'subject' => $subject,
@@ -41,6 +42,13 @@ class ActivityController extends Controller {
   public function update(Request $request, Subject $subject, Activity $activity) {
     $upsertPayload = [];
 
+    $activity->update([
+      'title' => $request->post('title'),
+      'description' => $request->post('description'),
+      'due_date' => $request->post('due_date'),
+      'points' => $request->post('points')
+    ]);
+
     foreach($request->post('studentsScores') as $student) {
       $upsertPayload[] = [
         'activity_id' => $activity['id'],
@@ -53,17 +61,41 @@ class ActivityController extends Controller {
     ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_id'], update: ['score', 'remarks']);
   }
 
+  public function create(Request $request, Subject $subject) {
+    return Inertia::render('Subjects/Activities/Create', [
+      'subject' => $subject,
+      'type' => $request->get('type'),
+      'students' => $subject->students->sortBy('last_name')->values()->all()
+    ]);
+  }
+
+  public function destroy(Request $request, Subject $subject, Activity $activity) {
+    $activity->delete();
+  }
+
   public function store(Request $request) {
     $formFields = $request->validate([
       'title' => 'required',
       'subject_id' => 'required',
       'period' => 'required',
       'academic_year_id' => 'required',
-      'type' => 'required',
       'points' => 'required|integer|min:1',
       'due_date' => 'required'
     ]);
 
+    $formFields['type'] = $request->post('type');
     $activity = Activity::create($formFields);
+
+    $upsertPayload = [];
+    foreach($request->post('studentsScores') as $student) {
+      $upsertPayload[] = [
+        'activity_id' => $activity['id'],
+        'student_id' => $student['id'],
+        'score' => $student['score'],
+        'remarks' => $student['remarks']
+      ];
+    }
+
+    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_id'], update: ['score', 'remarks']);
   }
 }

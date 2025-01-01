@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Native\Laravel\Facades\Settings;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,7 +40,12 @@ class HandleInertiaRequests extends Middleware
         ? $request->user()->only('id', 'first_name', 'last_name', 'email', 'token', 'username', 'department', 'role')
         : null,
       'app' => [
-        'version' => env('NATIVEPHP_APP_VERSION', '1.0.0')
+        'version' => env('NATIVEPHP_APP_VERSION', '1.0.0'),
+        'settings' => [
+          'academic_years' => Settings::get('academic_years'),
+          'academic_year' => Settings::get('academic_year'),
+          'period' => Settings::get('period', 'prelim')
+        ]
       ]
     ]);
   }

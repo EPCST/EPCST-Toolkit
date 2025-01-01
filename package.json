@@ -38,6 +38,7 @@
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
+    "nprogress": "^0.2.0",
     "preline": "^2.6.0",
     "svelte": "^5.14.1",
     "svelte-radix": "^2.0.1",

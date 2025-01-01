@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Native\Laravel\Facades\Notification;
+use Native\Laravel\Facades\Settings;
 
 class AuthController extends Controller {
   private string $baseUrl = 'https://gradebook.epcst.edu.ph/api';
@@ -57,6 +58,16 @@ class AuthController extends Controller {
       ]);
 
       Auth::loginUsingId($response['user']['id']);
+
+      $academicYears = Http::withHeaders([
+        'accept' => 'application/json',
+        'Authorization' => 'Bearer ' . auth()->user()->api_token,
+      ])->get($this->baseUrl . '/schoolyear')
+        ->json();
+
+      Settings::set('academic_years', $academicYears);
+      Settings::set('academic_year', $academicYears[count($academicYears) - 1]);
+      Settings::set('period', 'prelim');
 
       return redirect()->route('dashboard');
     } catch (Exception $e) {

@@ -13,6 +13,12 @@
   });
 
   const { subject, activities } = $props();
+
+  function removeActivity(id) {
+    router.visit(route('subjects.activities.destroy', {subject: subject.id, activity: id}), {
+      method: "delete"
+    })
+  }
 </script>
 
 <div class="flex flex-col sm:gap-4 sm:pl-14">
@@ -45,11 +51,12 @@
             </thead>
             <tbody class="divide-y divide-gray-200 border-collapse">
               {#each activities['quiz'] as quiz}
+                {@const completedStudents = quiz.students.filter((student) => student['pivot']['score']).length}
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.title}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.due_date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - quiz.students.length}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.students.length}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - completedStudents}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{completedStudents}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border flex gap-2">
                   <div class="hs-tooltip">
@@ -59,8 +66,7 @@
                     </Link>
                   </div>
                   <div class="hs-tooltip">
-                    <button
-                      class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
+                    <button onclick={() => removeActivity(quiz.id)} class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
                       <FileMinus size="16" />
                       <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1261px, -720px);">Remove Quiz</span>
                     </button>
@@ -70,7 +76,7 @@
               {/each}
               <tr>
                 <td class="hover:bg-blue-400 cursor-pointer hover:text-white text-centerpx-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border" colspan="6">
-                  <a href="/subjects/w1lrzmxbi243ynf/activities/create?type=quiz" class="block font-xl text-center">Add new Quiz</a>
+                  <Link href="{route('subjects.activities.create', {subject: subject.id, type: 'quiz'})}" class="block font-xl text-center">Add new quiz</Link>
                 </td>
               </tr>
             </tbody>
@@ -98,11 +104,12 @@
             </thead>
             <tbody class="divide-y divide-gray-200 border-collapse">
             {#each activities['activity'] as activity}
+              {@const completedStudents = activity.students.filter((student) => student['pivot']['score']).length}
             <tr>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.title}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.due_date}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - activity.students.length}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.students.length}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - completedStudents}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{completedStudents}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length}</td>
               <td class="px-6 py-4 whitespace-nowrap flex gap-2 text-sm text-gray-800 border-gray-200 border">
                 <div class="hs-tooltip">
@@ -112,8 +119,7 @@
                   </Link>
                 </div>
                 <div class="hs-tooltip">
-                  <button
-                    class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
+                  <button onclick={() => removeActivity(activity.id)} class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
                     <FileMinus size="16" />
                     <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1261px, -720px);">Remove Activity</span>
                   </button>
@@ -123,7 +129,7 @@
             {/each}
             <tr>
               <td class="hover:bg-blue-400 cursor-pointer hover:text-white text-centerpx-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border" colspan="6">
-                <Link href="/subjects/w1lrzmxbi243ynf/activities/create?type=activity" class="block font-xl text-center">Add new Assignment</Link>
+                <Link href="{route('subjects.activities.create', {subject: subject.id, type: 'activity'})}" class="block font-xl text-center">Add new assignment</Link>
               </td>
             </tr>
             </tbody>

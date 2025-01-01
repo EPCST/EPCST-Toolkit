@@ -1,13 +1,26 @@
 <script>
 import logo from "$lib/static/ic_launcher.png";
-import {inertia, Link, page} from '@inertiajs/svelte';
+import {inertia, Link, page, router} from '@inertiajs/svelte';
 import * as Tooltip from "$lib/components/ui/tooltip/index.js";
 import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
 import * as HoverCard from "$lib/components/ui/hover-card/index.js";
+import * as Popover from "$lib/components/ui/popover";
+import * as Select from "$lib/components/ui/select/index.js";
 
-import {Book, ChartLine, UsersRound, Settings, Package, House} from "lucide-svelte";
+import {Book, ChartLine, UsersRound, Settings, Package, House, GraduationCap} from "lucide-svelte";
 import {Button} from "$lib/components/ui/button/index.js";
+import {Label} from "$lib/components/ui/label/index.js";
+import {onMount} from "svelte";
+
+function updateSetting(e) {
+  router.post('/settings', {
+    [e.target.id]: e.target.value
+  }, {
+    async: true
+  });
+}
+
 </script>
 
 <aside class="bg-background fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
@@ -16,7 +29,7 @@ import {Button} from "$lib/components/ui/button/index.js";
       <AlertDialog.Trigger asChild let:builder>
         <div {...builder} use:builder.action class="cursor-pointer text-primary-foreground group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full text-lg font-semibold md:h-8 md:w-8 md:text-base">
           <img alt="EPCST Toolkit Logo" src={logo} class="h-8 w-8 transition-all group-hover:scale-110" />
-          <span class="sr-only">EPCST Toolkit</span>  
+          <span class="sr-only">EPCST Toolkit</span>
         </div>
       </AlertDialog.Trigger>
       <AlertDialog.Content class="gap-0">
@@ -39,7 +52,7 @@ import {Button} from "$lib/components/ui/button/index.js";
               </HoverCard.Content>
             </HoverCard.Root>
           </p>
-        </div> 
+        </div>
       </AlertDialog.Content>
     </AlertDialog.Root>
     <Tooltip.Root>
@@ -118,17 +131,34 @@ import {Button} from "$lib/components/ui/button/index.js";
   <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
     <Tooltip.Root>
       <Tooltip.Trigger asChild let:builder>
-        <a
-          href="##"
-          class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          use:builder.action
-          {...builder}
-        >
-          <Settings class="h-5 w-5" />
-          <span class="sr-only">Settings</span>
-        </a>
+        <Popover.Root>
+          <Popover.Trigger>
+            <a
+              href="##"
+              class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
+              use:builder.action
+              {...builder}
+            >
+              <GraduationCap class="h-5 w-5" />
+              <span class="sr-only">Academic Year Selection</span>
+            </a>
+          </Popover.Trigger>
+          <Popover.Content side="right" class="flex flex-col gap-2">
+            <select id="academic_year" onchange={updateSetting} class="py-3 px-4 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
+              {#each $page.props.app.settings.academic_years as academic_year}
+                <option selected={academic_year.id === Number($page.props.app.settings.academic_year)} value="{academic_year.id}">{academic_year.school_year} / {academic_year.semester}</option>
+              {/each}
+            </select>
+            <select id="period" onchange={updateSetting} class="py-3 px-4 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none">
+              <option selected={'prelim' === $page.props.app.settings.period} value="prelim">PRELIM</option>
+              <option selected={'midterm' === $page.props.app.settings.period} value="midterm">MIDTERM</option>
+              <option selected={'final' === $page.props.app.settings.period} value="final">FINAL</option>
+            </select>
+
+          </Popover.Content>
+        </Popover.Root>
       </Tooltip.Trigger>
-      <Tooltip.Content side="right">Settings</Tooltip.Content>
+      <Tooltip.Content side="right">Academic Year Selection</Tooltip.Content>
     </Tooltip.Root>
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild let:builder>

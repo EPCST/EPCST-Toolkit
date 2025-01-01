@@ -14,13 +14,12 @@ class SubjectController extends Controller
 {
   protected string $baseUrl = 'https://gradebook.epcst.edu.ph/api';
 
-  public function fetchSubjects()
-  {
+  public function fetchSubjects() {
     try {
       $response = Http::withHeaders([
         'accept' => 'application/json',
         'Authorization' => 'Bearer ' . auth()->user()->api_token,
-      ])->get($this->baseUrl . '/teacher/subjects/semesters/9?sectionQuery=all&mySubjects=1&page=1&search=')
+      ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=1&search=')
         ->json();
 
       // Need to refresh the token, use their credentials.
@@ -28,17 +27,17 @@ class SubjectController extends Controller
         // Todo: implement refresh
       }
 
-      foreach ($response['data'] as $subject) {
+      foreach($response['data'] as $subject) {
         Subject::createOrFirst([
           'title' => $subject['title'],
           'section' => $subject['section_name'],
           'subject_id' => $subject['id'],
-          'academic_year_id' => 9,
+          'academic_year_id' => Settings::get('academic_year'),
           'section_id' => $subject['section_id'],
         ]);
       }
 
-      $subjects = Subject::where('academic_year_id', 9)->get()->groupBy('title');
+      $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get()->groupBy('title');
 
       return Inertia::render('Subjects/List', [
         'subjects' => $subjects
@@ -106,17 +105,18 @@ class SubjectController extends Controller
     }
   }
 
-  public function index()
-  {
-    $subjects = Subject::where('academic_year_id', 9)->get()->groupBy('title');
+  public function index() {
+    $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get()->groupBy('title');
 
     return inertia('Subjects/List', [
       'subjects' => $subjects
     ]);
   }
 
-  public function show(Subject $subject)
-  {
-    return inertia('Subjects/Show', ['subject' => $subject, 'students' => $subject->students]);
+  public function show(Subject $subject) {
+    return inertia('Subjects/Show', [
+      'subject' => $subject,
+      'activities' => $subject->activities->where('period', Settings::get('period')),
+      'students' => $subject->students->sortBy('last_name')->values()->toArray()]);
   }
 }

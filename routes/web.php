@@ -8,6 +8,7 @@ use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Native\Laravel\Facades\Settings;
 
 
 Route::redirect('/', '/login')->name('home');
@@ -23,6 +24,12 @@ Route::middleware('auth')->group(function(){
     ]);
   })->name('dashboard');
 
+  Route::post('/settings', function(Request $request) {
+    foreach($request->all() as $key => $value) {
+      Settings::set($key, $value);
+    }
+  });
+
   Route::group(['prefix' => 'subjects'], function(){
     Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
     Route::get('/fetch', [SubjectController::class, 'fetchSubjects'])->name('subjects.fetchSubjects');
@@ -37,6 +44,7 @@ Route::middleware('auth')->group(function(){
     Route::post('/{subject}/activities/create', [ActivityController::class, 'store'])->name('subjects.activities.store');
     Route::get('/{subject}/activities/{activity}', [ActivityController::class, 'show'])->name('subjects.activities.show');
     Route::post('/{subject}/activities/{activity}', [ActivityController::class, 'update'])->name('subjects.activities.update');
+    Route::delete('/{subject}/activities/{activity}/delete', [ActivityController::class, 'destroy'])->name('subjects.activities.destroy');
     Route::get('/{subject}/fetch', [SubjectController::class, 'fetchStudents'])->name('subjects.fetchStudents');
   });
 
