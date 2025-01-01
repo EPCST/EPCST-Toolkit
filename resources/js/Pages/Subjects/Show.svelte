@@ -8,6 +8,7 @@
   import {Button} from "$lib/components/ui/button/index.js";
   import {ChevronLeft} from "lucide-svelte";
 
+  const { subject, students } = $props();
 
   const form = useForm({
     title: '',
@@ -44,7 +45,7 @@
         <i class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-community"></i>
         <div class="sm:order-1 grow space-y-1">
           <h2 class="sm:mb-3 text-sm text-stone-500"># of Students</h2>
-          <p class="text-lg md:text-xl font-semibold text-stone-800">{$page.props.students.length}</p>
+          <p class="text-lg md:text-xl font-semibold text-stone-800">{students.length}</p>
         </div>
       </div>
       <div class="mt-1 flex items-center gap-x-2">
@@ -55,7 +56,7 @@
       <div class="sm:flex sm:gap-x-3"><i class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-post"></i>
         <div class="sm:order-1 grow space-y-1">
           <h2 class="sm:mb-3 text-sm text-stone-500">Activities / Quizzes</h2>
-          <p class="text-lg md:text-xl font-semibold text-stone-800">{$page.props.subject.activities.length}</p>
+          <p class="text-lg md:text-xl font-semibold text-stone-800">{subject.activities.length}</p>
         </div>
       </div>
       <div class="mt-1 flex items-center gap-x-2">

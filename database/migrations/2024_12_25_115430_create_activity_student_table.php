@@ -14,7 +14,8 @@ return new class extends Migration {
       $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
       $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
       $table->primary(['activity_id', 'student_id']);
-      $table->float('score', 1);
+      $table->float('score', 1)->nullable();
+      $table->string('remarks')->nullable();
       $table->timestamps();
     });
   }

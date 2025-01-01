@@ -41,15 +41,14 @@ class SubjectController extends Controller
       $subjects = Subject::where('academic_year_id', 9)->get()->groupBy('title');
 
       return Inertia::render('Subjects/List', [
-        'subjects' => $subjects,
+        'subjects' => $subjects
       ]);
     } catch (Exception $e) {
       return redirect()->back()->withErrors(['generic' => $e->getMessage()]);
     }
   }
 
-  public function fetchStudents(Subject $subject)
-  {
+  public function fetchStudents(Subject $subject) {
     try {
       $response = Http::withHeaders([
         'accept' => 'application/json',
@@ -98,7 +97,7 @@ class SubjectController extends Controller
         })
       );
 
-      return inertia('Subjects/Show', [
+      return redirect()->back()->with([
         'subject' => $subject,
         'students' => $subject->students,
       ]);

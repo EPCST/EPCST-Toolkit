@@ -1,6 +1,7 @@
 <script>
   import logo from "$lib/static/ic_launcher.png";
   import { inertia } from '@inertiajs/svelte';
+  import { Toaster } from "$lib/components/ui/sonner";
 
   let { children } = $props();
 
@@ -40,7 +41,8 @@
 </script>
 
 <div class="bg-muted/40 flex min-h-screen w-full flex-col">
+  <Toaster />
   <Sidebar />
-  
+
   {@render children()}
 </div>

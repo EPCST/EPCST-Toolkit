@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\ActivityStudent;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -28,7 +29,7 @@ class ActivityController extends Controller {
       ->get();
 
     // Merge both collections
-    $allStudents = $activity->students->concat($studentsWithoutScores);
+    $allStudents = $activity->students->concat($studentsWithoutScores)->sortBy('last_name')->values()->all();
 
     return Inertia::render('Subjects/Activities/Show', [
       'subject' => $subject,
@@ -36,6 +37,22 @@ class ActivityController extends Controller {
       'students' => $allStudents
     ]);
   }
+
+  public function update(Request $request, Subject $subject, Activity $activity) {
+    $upsertPayload = [];
+
+    foreach($request->post('studentsScores') as $student) {
+      $upsertPayload[] = [
+        'activity_id' => $activity['id'],
+        'student_id' => $student['id'],
+        'score' => $student['score'],
+        'remarks' => $student['remarks']
+      ];
+    }
+
+    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_id'], update: ['score', 'remarks']);
+  }
+
   public function store(Request $request) {
     $formFields = $request->validate([
       'title' => 'required',
@@ -47,6 +64,6 @@ class ActivityController extends Controller {
       'due_date' => 'required'
     ]);
 
-    Activity::create($formFields);
+    $activity = Activity::create($formFields);
   }
 }

@@ -14,7 +14,7 @@ class Activity extends Model {
   protected function casts(): array
   {
     return [
-      'due_date' => 'datetime:M d, Y',
+      'due_date' => 'datetime:M d, Y h:i A',
     ];
   }
 
@@ -23,6 +23,8 @@ class Activity extends Model {
   }
 
   public function students(): BelongsToMany {
-    return $this->belongsToMany(Student::class);
+    return $this->belongsToMany(Student::class)
+      ->using(ActivityStudent::class)
+      ->withPivot(['remarks', 'score']);
   }
 }

@@ -44,16 +44,16 @@
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 border-collapse">
-              {#each activities['activity'] as activity}
+              {#each activities['quiz'] as quiz}
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.title}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.due_date}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - activity.students.length}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.students.length}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.title}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.due_date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - quiz.students.length}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{quiz.students.length}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border flex gap-2">
                   <div class="hs-tooltip">
-                    <Link href="{route('subjects.activities.show', {subject: subject.id, activity: activity.id})}" type="button" class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                    <Link href="{route('subjects.activities.show', {subject: subject.id, activity: quiz.id})}" type="button" class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                       <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1271px, -720px);">View</span>
                       <Eye size={16} class="w-auto"/>
                     </Link>
@@ -62,7 +62,7 @@
                     <button
                       class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
                       <FileMinus size="16" />
-                      <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1261px, -720px);">Remove Activity</span>
+                      <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1261px, -720px);">Remove Quiz</span>
                     </button>
                   </div>
                 </td>
@@ -97,65 +97,34 @@
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 border-collapse">
+            {#each activities['activity'] as activity}
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Flexbox Activity
-                Template
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.title}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.due_date}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length - activity.students.length}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{activity.students.length}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.students.length}</td>
+              <td class="px-6 py-4 whitespace-nowrap flex gap-2 text-sm text-gray-800 border-gray-200 border">
+                <div class="hs-tooltip">
+                  <Link href="{route('subjects.activities.show', {subject: subject.id, activity: activity.id})}" type="button" class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                    <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1271px, -720px);">View</span>
+                    <Eye size={16} class="w-auto"/>
+                  </Link>
+                </div>
+                <div class="hs-tooltip">
+                  <button
+                    class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px]">
+                    <FileMinus size="16" />
+                    <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip" data-popper-placement="top" style="position: fixed; inset: auto auto 0px 0px; margin: 0px; transform: translate(1261px, -720px);">Remove Activity</span>
+                  </button>
+                </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Oct 22, 2024
-                05:30:00PM <span class="bg-red-400 rounded-md p-2 text-white">Past Due</span></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">6</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">16</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">22</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"><a
-                href="/subjects/w1lrzmxbi243ynf/activities/w8t8k9l2bdgu4xo" type="button"
-                class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"><span
-                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white"
-                role="tooltip">View</span> <i class="iconoir-eye-solid text-xl"></i></a></td>
             </tr>
+            {/each}
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Flexbox Froggy</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Oct 22, 2024
-                05:30:00PM <span class="bg-red-400 rounded-md p-2 text-white">Past Due</span></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">5</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">17</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">22</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"><a
-                href="/subjects/w1lrzmxbi243ynf/activities/wrykz9k9iycvbun" type="button"
-                class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"><span
-                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white"
-                role="tooltip">View</span> <i class="iconoir-eye-solid text-xl"></i></a></td>
-            </tr>
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Login Form</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Oct 29, 2024
-                05:30:00PM <span class="bg-red-400 rounded-md p-2 text-white">Past Due</span></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">10</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">12</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">22</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"><a
-                href="/subjects/w1lrzmxbi243ynf/activities/8j44l75hw2ot0y7" type="button"
-                class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"><span
-                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white"
-                role="tooltip">View</span> <i class="iconoir-eye-solid text-xl"></i></a></td>
-            </tr>
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Ticket</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">Oct 18, 2024
-                05:30:00PM <span class="bg-red-400 rounded-md p-2 text-white">Past Due</span></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">3</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">19</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">22</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"><a
-                href="/subjects/w1lrzmxbi243ynf/activities/bpm901ouffttfj3" type="button"
-                class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"><span
-                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white"
-                role="tooltip">View</span> <i class="iconoir-eye-solid text-xl"></i></a></td>
-            </tr>
-            <tr>
-              <td
-                class="hover:bg-blue-400 cursor-pointer hover:text-white text-centerpx-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"
-                colspan="6"><a href="/subjects/w1lrzmxbi243ynf/activities/create?type=activity"
-                               class="block font-xl text-center">Add new Assignment</a></td>
+              <td class="hover:bg-blue-400 cursor-pointer hover:text-white text-centerpx-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border" colspan="6">
+                <Link href="/subjects/w1lrzmxbi243ynf/activities/create?type=activity" class="block font-xl text-center">Add new Assignment</Link>
+              </td>
             </tr>
             </tbody>
           </table>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Student extends Model {
@@ -11,5 +12,9 @@ class Student extends Model {
 
   public function subjects(): BelongsToMany {
     return $this->belongsToMany(Subject::class);
+  }
+
+  public function activities(): BelongsToMany {
+    return $this->belongsToMany(Activity::class)->using(ActivityStudent::class)->withPivot(['score', 'remarks']);
   }
 }
