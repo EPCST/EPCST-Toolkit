@@ -16,7 +16,8 @@ return new class extends Migration {
       $table->unsignedInteger('section_id');
       $table->enum('status', ['dropped', 'active', 'return'])->default('active');
       $table->date('last_attendance_date')->nullable();
-//      $table->boolean('return_to_class')->default(false);
+      $table->date('dropped_at')->nullable();
+      $table->date('returned_at')->nullable();
       $table->foreign('subject_id')->references('id')->on('subjects')->cascadeOnDelete();
     });
   }

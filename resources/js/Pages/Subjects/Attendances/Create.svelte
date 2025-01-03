@@ -34,9 +34,10 @@
   for(let student of subject.students) {
     studentAttendanceData[student.id] = {
       student_id: student.id,
-      status: 'present',
-      remarks: '',
-      hours: 0
+      status: student.pivot.status !== 'dropped' ? 'present' : 'absent',
+      remarks: student.pivot.status === 'dropped' && student.pivot.returned_at ? 'System Dropped' : '',
+      hours: 0,
+      return_to_class: false
     }
   }
 
@@ -59,7 +60,7 @@
     $form.attendanceData = studentAttendanceData;
 
     $form.post(route('subjects.attendances.store', subject.id), {
-      onFinish: function() {
+      onSuccess: function() {
         toast.success("Attendance Recorded", {
           position: 'bottom-right',
           description: 'Attendance record has been successfully created'
@@ -130,6 +131,7 @@
       <div class="relative">
         <input type="date" bind:value={$form.date} id="date" class="peer p-4 block w-full border-gray-200 rounded-lg text-sm placeholder:text-transparent focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none focus:pt-6 focus:pb-2 [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2 autofill:pt-6 autofill:pb-2" placeholder="********">
         <label for="date" class="absolute top-0 start-0 p-4 h-full text-sm truncate pointer-events-none transition ease-in-out duration-100 border border-transparent  origin-[0_0] peer-disabled:opacity-50 peer-disabled:pointer-events-none peer-focus:scale-90 peer-focus:translate-x-0.5 peer-focus:-translate-y-1.5 peer-focus:text-gray-500 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:translate-x-0.5 peer-[:not(:placeholder-shown)]:-translate-y-1.5 peer-[:not(:placeholder-shown)]:text-gray-500">Meeting Date</label>
+        <small class="mx-4 text-muted-foreground">Note: Create attendances in chronological order!</small>
         {#if $form.errors.date}
           <span class="error-msg mx-4 text-xs text-red-400" id="error-hours"><b>ERROR:</b> {$form.errors.date}</span>
         {/if}
@@ -153,13 +155,14 @@
       </thead>
       <tbody>
       {#each subject.students as student}
+        {@const permanentDropped = student.pivot.status === 'dropped' && student.pivot.returned_at}
         <tr class={studentAttendanceData[student.id].status === 'present' ? 'bg-green-400' : studentAttendanceData[student.id].status === 'absent' ? 'bg-red-400' : studentAttendanceData[student.id].status === 'excused' ? 'bg-blue-400' : 'bg-gray-400'}>
           <td class="p-2 border border-gray-400 bg-gray-200 sticky w-min text-nowrap overflow-ellipsis overflow-hidden left-0 z-10"><b>{student.last_name}</b>, {student.first_name}</td>
           <td class="border border-gray-400 min-w-[150px] text-center text-white" tabindex="-1" contenteditable="true">
-            <input type="text" bind:value={studentAttendanceData[student.id].hours} onchange={(e) => studentAttendanceData[student.id].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
+            <input disabled={permanentDropped} type="text" bind:value={studentAttendanceData[student.id].hours} onchange={(e) => studentAttendanceData[student.id].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
           </td>
           <td class="border border-gray-400 text-center">
-            <select bind:value={studentAttendanceData[student.id].status} onchange={(e) => updateAttendanceHours(student.id, e.target.value)} class="text-xs bg-transparent border-0 border-none">
+            <select disabled={permanentDropped} bind:value={studentAttendanceData[student.id].status} onchange={(e) => updateAttendanceHours(student.id, e.target.value)} class="text-xs bg-transparent border-0 border-none">
               <option value="present" selected>P</option>
               <option value="excused">E</option>
               <option value="absent">A</option>
@@ -167,28 +170,30 @@
             </select>
           </td>
           <td class="border border-gray-400 text-center">
-            <input type="text" tabindex="-1" bind:value={studentAttendanceData[student.id].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
+            <input type="text" disabled={permanentDropped} tabindex="-1" bind:value={studentAttendanceData[student.id].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
           </td>
-<!--          <td class="border border-gray-400 text-center hs-tooltip">-->
-<!--            <div class="relative inline-block hs-tooltip-toggle">-->
-<!--              <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">-->
-<!--                Return to Class-->
-<!--              </span>-->
-<!--              <input type="checkbox" id="hs-large-switch-with-icons" class="peer relative w-[4.25rem] h-9 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-blue-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-blue-600 checked:border-blue-600 focus:checked:border-blue-600 before:inline-block before:w-8 before:h-8 before:bg-white checked:before:bg-blue-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200">-->
-<!--              <label for="hs-large-switch-with-icons" class="sr-only">switch</label>-->
-<!--              <span class="peer-checked:text-white text-gray-500 size-8 absolute top-0.5 start-0.5 flex justify-center items-center pointer-events-none transition-colors ease-in-out duration-200 dark:text-neutral-500">-->
-<!--                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">-->
-<!--                  <path d="M18 6 6 18"></path>-->
-<!--                  <path d="m6 6 12 12"></path>-->
-<!--                </svg>-->
-<!--              </span>-->
-<!--              <span class="peer-checked:text-blue-600 text-gray-500 size-8 absolute top-0.5 end-0.5 flex justify-center items-center pointer-events-none transition-colors ease-in-out duration-200 dark:text-neutral-500">-->
-<!--                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">-->
-<!--                  <polyline points="20 6 9 17 4 12"></polyline>-->
-<!--                </svg>-->
-<!--              </span>-->
-<!--            </div>-->
-<!--          </td>-->
+          {#if student.pivot.status === 'dropped' && !student.pivot.returned_at}
+          <td class="border border-gray-400 text-center hs-tooltip">
+            <div class="relative inline-block hs-tooltip-toggle">
+              <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">
+                Return to Class
+              </span>
+              <input bind:checked={studentAttendanceData[student.id].return_to_class} type="checkbox" id="hs-large-switch-with-icons" class="peer relative w-[4.25rem] h-9 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-blue-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-blue-600 checked:border-blue-600 focus:checked:border-blue-600 before:inline-block before:w-8 before:h-8 before:bg-white checked:before:bg-blue-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200">
+              <label for="hs-large-switch-with-icons" class="sr-only">switch</label>
+              <span class="peer-checked:text-white text-gray-500 size-8 absolute top-0.5 start-0.5 flex justify-center items-center pointer-events-none transition-colors ease-in-out duration-200 dark:text-neutral-500">
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+                </svg>
+              </span>
+              <span class="peer-checked:text-blue-600 text-gray-500 size-8 absolute top-0.5 end-0.5 flex justify-center items-center pointer-events-none transition-colors ease-in-out duration-200 dark:text-neutral-500">
+                <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+            </div>
+          </td>
+          {/if}
         </tr>
         {/each}
       </tbody>

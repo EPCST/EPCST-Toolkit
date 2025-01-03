@@ -15,7 +15,7 @@ class Attendance extends Model {
     ];
   }
   public function students(): BelongsToMany {
-    return $this->belongsToMany(Student::class, 'attendance_student_subject')->withPivot(['subject_id', 'hours', 'remarks', 'status']);
+    return $this->belongsToMany(Student::class, 'attendance_student_subject')->withPivot(['subject_id', 'is_dropped', 'return_to_class', 'hours', 'remarks', 'status']);
   }
 
   public function subjects(): BelongsToMany {

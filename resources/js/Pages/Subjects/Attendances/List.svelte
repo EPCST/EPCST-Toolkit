@@ -5,9 +5,13 @@
 <script>
   import {onMount} from 'svelte';
   import {Link, page, router} from '@inertiajs/svelte';
-  import {ChevronLeft, EllipsisVertical, Eye, FileMinus, Pencil} from "lucide-svelte";
+  import {ChevronLeft, EllipsisVertical, Eye, FileMinus, Pencil, StickyNote, Undo2} from "lucide-svelte";
 
   const {subject,attendances} = $props();
+
+  onMount(() => {
+    window.HSStaticMethods.autoInit();
+  });
 </script>
 <div class="flex flex-col sm:pl-14">
   <div class="bg-blue-500 text-white px-1/2 p-8 flex items-center justify-between">
@@ -45,16 +49,41 @@
         {#each subject.students as student, i}
           {@const studentTotalAbsences = student.attendances.reduce((acc, cur) => acc + (cur.pivot.hours || 0), 0)}
           {@const studentTotalPresent = student.attendances.reduce((acc, cur) => acc + (cur.hours || 0), 0)}
+          {@const status = student.pivot.status.toUpperCase()}
+
           <tr class="student-attendance">
-            <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
+            <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold && student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
               <b>{student.last_name}</b>, {student.first_name}
             </td>
             {#each student.attendances.sort((a, b) => a.date.localeCompare(b.date)) as attendance}
             <td class="p-2 border border-gray-400 {student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-50'}">
-              <div class="flex justify-between items-center hs-tooltip"><p>{attendance.pivot.hours}</p></div>
+              <div class="flex justify-between items-center hs-tooltip">
+                <p>{attendance.pivot.hours}</p>
+                {#if attendance.pivot.remarks}
+                  <span class="hs-tooltip-toggle">
+                    <StickyNote size="16" />
+                    <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">
+                      {attendance.pivot.remarks}
+                    </span>
+                  </span>
+                {:else if attendance.pivot.return_to_class}
+                  <span class="hs-tooltip-toggle">
+                    <Undo2 size="16" />
+                    <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">
+                      Return To Class
+                    </span>
+                  </span>
+                {/if}
+              </div>
             </td>
             {/each}
-            <td class="border border-gray-400 bg-gray-50 text-center">{student.pivot.status.toUpperCase()}</td>
+            <td class="border border-gray-400 bg-gray-50 text-center">
+              {#if (status === 'RETURN' || status === 'ACTIVE')}
+                ACTIVE
+              {:else}
+                {status}
+              {/if}
+            </td>
             <td class="border border-gray-400 bg-gray-50 text-center">
               {studentTotalAbsences}
             </td>
