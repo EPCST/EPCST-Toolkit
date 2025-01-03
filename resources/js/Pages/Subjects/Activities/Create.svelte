@@ -40,7 +40,7 @@
       preserveScroll: true,
       onSuccess: () => {
         toast.success("Activity created successfully", {
-          position: 'top-right'
+          position: 'bottom-right'
         });
         router.get(route('subjects.activities.index', {subject: subject.id}), {}, { replace: true })
       }

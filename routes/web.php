@@ -37,7 +37,7 @@ Route::middleware('auth')->group(function(){
     Route::get('/{subject}/attendances', [AttendanceController::class, 'index'])->name('subjects.attendances.index');
     Route::get('/{subject}/attendances/create', [AttendanceController::class, 'create'])->name('subjects.attendances.create');
     Route::post('/{subject}/attendances/create', [AttendanceController::class, 'store'])->name('subjects.attendances.store');
-    Route::get('/{subject}/attendances/{attendance}', [AttendanceController::class, 'show'])->name('subjects.attendances.show');
+    Route::get('/{subject}/attendances/{attendance}', [AttendanceController::class, 'edit'])->name('subjects.attendances.edit');
     Route::post('/{subject}/attendances/{attendance}', [AttendanceController::class, 'update'])->name('subjects.attendances.update');
     Route::get('/{subject}/activities', [ActivityController::class, 'index'])->name('subjects.activities.index');
     Route::get('/{subject}/activities/create', [ActivityController::class, 'create'])->name('subjects.activities.create');

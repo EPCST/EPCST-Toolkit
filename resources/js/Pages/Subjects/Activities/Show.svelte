@@ -42,7 +42,7 @@
       preserveScroll: true,
       onSuccess: () => {
         toast.success("Activity saved successfully", {
-          position: 'top-right',
+          position: 'bottom-right',
           description: 'All changes to activity has been saved successfully.'
         });
       }

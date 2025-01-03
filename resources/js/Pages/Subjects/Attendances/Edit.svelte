@@ -8,7 +8,7 @@
   import { toast } from "svelte-sonner";
 
   import {Button} from "$lib/components/ui/button/index.js";
-  import {ChevronLeft} from "lucide-svelte";
+  import {ChevronLeft, LoaderCircle} from "lucide-svelte";
   import {Input} from "$lib/components/ui/input/index.js";
   import {Label} from "$lib/components/ui/label/index.js";
   import CalendarIcon from "svelte-radix/Calendar.svelte";
@@ -23,24 +23,25 @@
   import * as Select from "$lib/components/ui/select/index.js";
   import {onMount} from "svelte";
 
+  let { subject, attendance } = $props();
+
   const form = useForm({
-    date: new Date().toISOString().substring(0,10),
-    hours: 0,
+    date: attendance.date,
+    hours: attendance.hours,
     attendanceData: {}
   });
 
   let studentAttendanceData = $state({});
 
-  for(let student of subject.students) {
+  for(let student of attendance.students) {
     studentAttendanceData[student.id] = {
       student_id: student.id,
-      status: 'present',
-      remarks: '',
-      hours: 0
+      status: student.pivot.status,
+      remarks: student.pivot.remarks,
+      hours: student.pivot.hours
     }
   }
 
-  let { subject } = $props();
   let value;
 
   function updateAttendanceHours(id, status) {
@@ -58,11 +59,11 @@
   function save() {
     $form.attendanceData = studentAttendanceData;
 
-    $form.post(route('subjects.attendances.store', subject.id), {
+    $form.post(route('subjects.attendances.update', {subject: subject.id, attendance: attendance.id}), {
       onFinish: function() {
-        toast.success("Attendance Recorded", {
+        toast.success("Attendance Updated", {
           position: 'bottom-right',
-          description: 'Attendance record has been successfully created'
+          description: 'Attendance record has been successfully updated'
         });
         router.get(route('subjects.attendances.index', {subject: subject.id}), {}, { replace: true })
       }
@@ -198,8 +199,12 @@
     <Link href="{route('subjects.attendances.index', subject.id)}" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none">
       Cancel
     </Link>
-    <button onclick={save} type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:bg-blue-200 disabled:opacity-50 disabled:pointer-events-none">
-      Create
+    <button onclick={save} disabled={$form.processing} type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:bg-blue-200 disabled:opacity-50 disabled:pointer-events-none">
+      {#if $form.processing}
+        <LoaderCircle class="h-4 w-4 animate-spin" />
+      {:else}
+        Save
+      {/if}
     </button>
   </div>
 </div>

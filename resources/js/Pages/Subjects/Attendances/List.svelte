@@ -30,7 +30,7 @@
           <th class="p-2 border border-gray-400 sticky top-0 left-0 bg-gray-300 z-20">&ZeroWidthSpace;</th>
           {#each attendances as attendance}
           <th class="p-2 border border-gray-400 min-w-[150px] text-center hover:bg-gray-400 cursor-pointer">
-            <Link href="/subjects/c5mj35rxbjrpmai/attendances/7za1mrcplqye5ky">
+            <Link href="{route('subjects.attendances.edit', {subject: subject.id, attendance: attendance.id})}">
               <div class="flex items-center justify-center gap-4">{attendance.date} <Pencil size="14" />
               </div>
             </Link>
@@ -46,11 +46,11 @@
           {@const studentTotalAbsences = student.attendances.reduce((acc, cur) => acc + (cur.pivot.hours || 0), 0)}
           {@const studentTotalPresent = student.attendances.reduce((acc, cur) => acc + (cur.hours || 0), 0)}
           <tr class="student-attendance">
-            <td class="p-2 border border-gray-400 bg-gray-200 sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
+            <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
               <b>{student.last_name}</b>, {student.first_name}
             </td>
-            {#each student.attendances as attendance}
-            <td class="p-2 border border-gray-400 bg-gray-50">
+            {#each student.attendances.sort((a, b) => a.date.localeCompare(b.date)) as attendance}
+            <td class="p-2 border border-gray-400 {student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-50'}">
               <div class="flex justify-between items-center hs-tooltip"><p>{attendance.pivot.hours}</p></div>
             </td>
             {/each}

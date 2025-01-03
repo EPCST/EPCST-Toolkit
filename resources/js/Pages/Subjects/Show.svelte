@@ -37,7 +37,7 @@
       onFinish: function() {
         loading = false;
         toast.success("Fetch Successful", {
-          position: 'top-right',
+          position: 'bottom-right',
           description: 'Students has been successfully fetched from grade book.'
         });
       }
