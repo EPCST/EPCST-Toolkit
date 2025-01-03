@@ -14,7 +14,7 @@ return new class extends Migration {
       $table->unsignedBigInteger('subject_id');
       $table->unsignedInteger('academic_year_id');
       $table->unsignedInteger('section_id');
-
+      $table->enum('status', ['dropped', 'active', 'return'])->default('active');
       $table->foreign('subject_id')->references('id')->on('subjects')->cascadeOnDelete();
     });
   }

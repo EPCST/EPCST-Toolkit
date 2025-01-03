@@ -13,7 +13,8 @@ return new class extends Migration {
       $table->id();
       $table->string('period');
       $table->integer('academic_year_id');
-      $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
+      $table->date('date');
+      $table->float('hours', 1)->comment('session length');
       $table->timestamps();
     });
   }

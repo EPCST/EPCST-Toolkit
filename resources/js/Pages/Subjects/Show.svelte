@@ -13,7 +13,7 @@
   import {Badge} from "$lib/components/ui/badge/index.js";
   let loading = $state(false);
 
-  const { activities, subject, students } = $props();
+  const { attendances, activities, subject, students } = $props();
 
   const form = useForm({
     title: '',
@@ -63,9 +63,9 @@
         <ChevronLeft size="16" /> Go Back
       </Link>
     </div>
-    <button type="button" data-hs-overlay="#add-student" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-green-200 hover:border-green-400 hover:text-green-400 disabled:opacity-50 disabled:pointer-events-none">
-      Add Student
-    </button>
+<!--    <button type="button" data-hs-overlay="#add-student" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-green-200 hover:border-green-400 hover:text-green-400 disabled:opacity-50 disabled:pointer-events-none">-->
+<!--      Add Student-->
+<!--    </button>-->
   </div>
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-5 p-4">
     <div class="p-4 sm:p-5 bg-white border border-stone-200 rounded-xl shadow-sm">
@@ -92,8 +92,8 @@
       </div>
     </div>
     <div class="p-4 sm:p-5 bg-white border border-stone-200 rounded-xl shadow-sm">
-      <div class="sm:flex sm:gap-x-3"><i
-        class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-calculator"></i>
+      <div class="sm:flex sm:gap-x-3">
+        <i class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-calculator"></i>
         <div class="sm:order-1 grow space-y-1">
           <h2 class="sm:mb-3 text-sm text-stone-500">Exams</h2>
           <p class="text-lg md:text-xl font-semibold text-stone-800">{$page.props.app.settings.period.toUpperCase()}</p>
@@ -111,11 +111,11 @@
         <i class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-calendar"></i>
         <div class="sm:order-1 grow space-y-1">
           <h2 class="sm:mb-3 text-sm text-stone-500">Attendances</h2>
-          <p class="text-lg md:text-xl font-semibold text-stone-800">6</p>
+          <p class="text-lg md:text-xl font-semibold text-stone-800">{attendances.length}</p>
         </div>
       </div>
       <div class="mt-1 flex items-center gap-x-2">
-        <a class="text-xs hover:text-blue-400" href={route('subjects.attendances.index', subject.id)}>View All Attendances</a>
+        <Link class="text-xs hover:text-blue-400" href={route('subjects.attendances.index', subject.id)}>View All Attendances</Link>
       </div>
     </div>
   </div>
@@ -174,7 +174,7 @@
             No Students
           </p>
           <p class="mb-5 text-sm text-gray-500">
-            Fetch from the grade book or add manually
+            Fetch from the gradebook to get started.
           </p>
           <Button onclick={fetchStudents} disabled={loading} variant="outline" class="gap-2">
             {#if loading}
@@ -201,19 +201,16 @@
                 Full Name
               </div>
             </th>
-
             <th scope="col" class="py-1 group text-start font-normal focus:outline-none">
               <div class="py-1 px-2.5 inline-flex items-center text-sm text-gray-500 rounded-md hover:border-gray-200">
                 Gender
               </div>
             </th>
-
             <th scope="col" class="py-1 group text-start font-normal focus:outline-none">
               <div class="py-1 px-2.5 inline-flex items-center text-sm text-gray-500 rounded-md hover:border-gray-200">
                 Email
               </div>
             </th>
-
             <th scope="col" class="py-2 px-3 text-end font-normal text-sm text-gray-500 --exclude-from-ordering">Action</th>
           </tr>
           </thead>
@@ -231,14 +228,6 @@
               </td>
               <td class="p-3 whitespace-nowrap text-sm font-medium text-gray-800">
                 <p>{student.email}</p>
-              </td>
-              <td class="hs-tooltip p-3 whitespace-nowrap text-sm font-medium flex justify-end">
-                <Button onclick={() => removeStudent(student.id)} class="hs-tooltip-toggle bg-red-400 hover:bg-red-500 text-sm text-white flex justify-center items-center p-2 rounded-md size-[38px] \">
-                  <UserMinus size="16" />
-                  <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">
-                  Remove Student
-                </span>
-                </Button>
               </td>
             </tr>
           {/each}

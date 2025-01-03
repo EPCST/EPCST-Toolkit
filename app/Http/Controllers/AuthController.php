@@ -66,7 +66,7 @@ class AuthController extends Controller {
         ->json();
 
       Settings::set('academic_years', $academicYears);
-      Settings::set('academic_year', $academicYears[count($academicYears) - 1]);
+      Settings::set('academic_year', $academicYears[count($academicYears) - 1]['id']);
       Settings::set('period', 'prelim');
 
       return redirect()->route('dashboard');

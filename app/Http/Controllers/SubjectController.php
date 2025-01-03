@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
+use App\Models\AttendanceStudent;
 use App\Models\Student;
 use App\Models\Subject;
 use Exception;
@@ -85,6 +87,21 @@ class SubjectController extends Controller
 
       // Attach all students to subject in one query
       $studentIds = Student::whereIn('student_no', $students->pluck('student_no'))->pluck('id');
+
+      foreach($subject->attendances as $attendance) {
+        $missingIds = $studentIds->diff(AttendanceStudent::where('attendance_id', $attendance->id)->get()->pluck('student_id'))->toArray();
+        foreach($missingIds as $id) {
+          AttendanceStudent::create([
+            'student_id' => $id,
+            'attendance_id' => $attendance->id,
+            'subject_id' => $attendance->pivot->subject_id,
+            'hours' => $attendance->hours,
+            'status' => 'absent',
+            'remarks' => 'Prefilled by System'
+          ]);
+        }
+      }
+
       // TODO: [Logic] I need to understand why exactly this works. AI made this.
       $subject->students()->sync(
         collect($studentIds)->mapWithKeys(function ($id) use ($subject) {
@@ -116,6 +133,7 @@ class SubjectController extends Controller
   public function show(Subject $subject) {
     return inertia('Subjects/Show', [
       'subject' => $subject,
+      'attendances' => $subject->attendances,
       'activities' => $subject->activities->where('period', Settings::get('period')),
       'students' => $subject->students->sortBy('last_name')->values()->toArray()]);
   }
