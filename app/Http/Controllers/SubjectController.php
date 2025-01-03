@@ -133,8 +133,8 @@ class SubjectController extends Controller
   public function show(Subject $subject) {
     return inertia('Subjects/Show', [
       'subject' => $subject,
-      'attendances' => $subject->attendances,
-      'activities' => $subject->activities->where('period', Settings::get('period')),
+      'attendances' => $subject->attendances->where('period', Settings::get('period'))->values()->toArray(),
+      'activities' => $subject->activities->where('period', Settings::get('period'))->values()->toArray(),
       'students' => $subject->students->sortBy('last_name')->values()->toArray()]);
   }
 }

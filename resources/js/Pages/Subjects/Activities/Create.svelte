@@ -24,12 +24,13 @@
 
   const form = useForm({
     type: type,
-    title: '',
+    title: ['prelim', 'midterm', 'final'].includes(type) ? type.toUpperCase() + ' Exam' : '',
     subject_id: subject.id,
     period: $page.props.app.settings.period,
     academic_year_id: Number($page.props.app.settings.academic_year),
     points: 0,
     due_date: '',
+    due_time: '',
     studentsScores: studentsScores
   });
 
@@ -42,7 +43,10 @@
         toast.success("Activity created successfully", {
           position: 'bottom-right'
         });
-        router.get(route('subjects.activities.index', {subject: subject.id}), {}, { replace: true })
+
+        if(!['prelim', 'midterm', 'final'].includes(type)) {
+          router.get(route('subjects.activities.index', {subject: subject.id}), {}, {replace: true})
+        }
       }
     });
   }
@@ -53,13 +57,20 @@
     <div class="space-y-3 mb-4">
       <div class="grid w-full items-center gap-1.5">
         <Label for="title">Title</Label>
-        <Input type="text" bind:value={$form.title} id="title" placeholder="Title" />
+        <Input disabled={['prelim', 'midterm', 'final'].includes($form.type)} type="text" bind:value={$form.title} id="title" placeholder="Title" />
         {#if $form.errors.title}<small class="text-xs text-red-400">{$form.errors.title}</small>{/if}
       </div>
-      <div class="grid w-full items-center gap-1.5">
-        <Label for="due_date">Due Date</Label>
-        <Input type="datetime-local" bind:value={$form.due_date} id="due_date" />
-        {#if $form.errors.due_date}<small class="text-xs text-red-400">{$form.errors.due_date}</small>{/if}
+      <div class="grid grid-cols-2 w-full items-center gap-1.5">
+        <div>
+          <Label for="due_date">Due Date</Label>
+          <Input type="date" bind:value={$form.due_date} id="due_date" />
+          {#if $form.errors.due_date}<small class="text-xs text-red-400">{$form.errors.due_date}</small>{/if}
+        </div>
+        <div>
+          <Label for="due_time">Time</Label>
+          <Input type="time" bind:value={$form.due_time} id="due_time" />
+          {#if $form.errors.due_date}<small class="text-xs text-red-400">{$form.errors.due_date}</small>{/if}
+        </div>
       </div>
       <div class="grid w-full items-center gap-1.5">
         <Label for="points">Points</Label>
@@ -93,7 +104,7 @@
       </table>
     </div>
     <div class="flex justify-between mt-4">
-      <Link href="{route('subjects.activities.index', subject.id)}" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none">Back</Link>
+      <Link href="{route(!['prelim', 'midterm', 'final'].includes(type) ? 'subjects.activities.index' : 'subjects.show', subject.id)}" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none">Back</Link>
       <button onclick={save} disabled={$form.processing} type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:bg-blue-200 disabled:opacity-50 disabled:pointer-events-none">
         Save
       </button>

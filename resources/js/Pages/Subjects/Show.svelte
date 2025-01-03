@@ -13,7 +13,7 @@
   import {Badge} from "$lib/components/ui/badge/index.js";
   let loading = $state(false);
 
-  const { attendances, activities, subject, students } = $props();
+  let { attendances, activities, subject, students } = $props();
 
   const form = useForm({
     title: '',
@@ -84,7 +84,7 @@
       <div class="sm:flex sm:gap-x-3"><i class="sm:order-2 mb-2 sm:mb-0 shrink-0 text-2xl text-stone-400 iconoir-post"></i>
         <div class="sm:order-1 grow space-y-1">
           <h2 class="sm:mb-3 text-sm text-stone-500">Activities / Quizzes</h2>
-          <p class="text-lg md:text-xl font-semibold text-stone-800">{activities.length}</p>
+          <p class="text-lg md:text-xl font-semibold text-stone-800">{activities.filter((a) => ['quiz', 'activity'].includes(a.type)).length}</p>
         </div>
       </div>
       <div class="mt-1 flex items-center gap-x-2">
@@ -103,7 +103,7 @@
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}>PRELIM</a>-->
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}><Badge class="bg-blue-400 hover:bg-blue-700">MIDTERM</Badge></a>-->
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}>FINAL</a>-->
-        <Link class="text-xs hover:text-blue-400 cursor-pointer">View Exam</Link>
+        <Link href="{activities.some((a) => a.type === $page.props.app.settings.period) ? route('subjects.activities.show', {subject: subject.id, activity: activities.filter((a) => a.type === $page.props.app.settings.period)[0].id}) : route('subjects.activities.create', {subject: subject.id, type: $page.props.app.settings.period})}" class="text-xs hover:text-blue-400 cursor-pointer">View Exam</Link>
       </div>
     </div>
     <div class="p-4 sm:p-5 bg-white border border-stone-200 rounded-xl shadow-sm">

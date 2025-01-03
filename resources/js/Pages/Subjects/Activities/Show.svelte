@@ -92,7 +92,7 @@
       </table>
     </div>
     <div class="flex justify-between mt-4">
-      <Link href="{route('subjects.activities.index', subject.id)}" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none">Back</Link>
+      <Link href="{route(!['prelim', 'midterm', 'final'].includes(activity.type) ? 'subjects.activities.index' : 'subjects.show', subject.id)}" type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent focus:outline-none disabled:opacity-50 disabled:pointer-events-none">Back</Link>
       <button onclick={save} disabled={$form.processing} type="button" class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:bg-blue-200 disabled:opacity-50 disabled:pointer-events-none">
         Save
       </button>
