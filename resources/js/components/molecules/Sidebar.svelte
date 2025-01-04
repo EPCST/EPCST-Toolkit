@@ -8,7 +8,7 @@ import * as HoverCard from "$lib/components/ui/hover-card/index.js";
 import * as Popover from "$lib/components/ui/popover";
 import * as Select from "$lib/components/ui/select/index.js";
 
-import {Book, ChartLine, UsersRound, Settings, Package, House, GraduationCap} from "lucide-svelte";
+import {Book, ChartLine, UsersRound, Settings, Package, House, GraduationCap, FileSpreadsheet} from "lucide-svelte";
 import {Button} from "$lib/components/ui/button/index.js";
 import {Label} from "$lib/components/ui/label/index.js";
 import {onMount} from "svelte";
@@ -88,45 +88,32 @@ function updateSetting(e) {
     <Tooltip.Root>
       <Tooltip.Trigger asChild let:builder>
         <a
-          href="##"
-          class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          use:builder.action
           {...builder}
+          class="{$page.url.indexOf('/reports') !== -1 ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
+          href={route('reports.index')}
+          use:builder.action
+          use:inertia
         >
-          <Package class="h-5 w-5" />
-          <span class="sr-only">Products</span>
+          <FileSpreadsheet class="h-5 w-5" />
+          <span class="sr-only">Reports</span>
         </a>
       </Tooltip.Trigger>
-      <Tooltip.Content side="right">Products</Tooltip.Content>
+      <Tooltip.Content side="right">Reports</Tooltip.Content>
     </Tooltip.Root>
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild let:builder>
-        <a
-          href="##"
-          class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          use:builder.action
-          {...builder}
-        >
-          <UsersRound class="h-5 w-5" />
-          <span class="sr-only">Customers</span>
-        </a>
-      </Tooltip.Trigger>
-      <Tooltip.Content side="right">Customers</Tooltip.Content>
-    </Tooltip.Root>
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild let:builder>
-        <a
-          href="##"
-          class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          use:builder.action
-          {...builder}
-        >
-          <ChartLine class="h-5 w-5" />
-          <span class="sr-only">Analytics</span>
-        </a>
-      </Tooltip.Trigger>
-      <Tooltip.Content side="right">Analytics</Tooltip.Content>
-    </Tooltip.Root>
+<!--    <Tooltip.Root>-->
+<!--      <Tooltip.Trigger asChild let:builder>-->
+<!--        <a-->
+<!--          href="##"-->
+<!--          class="text-muted-foreground hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"-->
+<!--          use:builder.action-->
+<!--          {...builder}-->
+<!--        >-->
+<!--          <ChartLine class="h-5 w-5" />-->
+<!--          <span class="sr-only">Analytics</span>-->
+<!--        </a>-->
+<!--      </Tooltip.Trigger>-->
+<!--      <Tooltip.Content side="right">Analytics</Tooltip.Content>-->
+<!--    </Tooltip.Root>-->
   </nav>
   <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
     <Tooltip.Root>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubjectController;
 use App\Models\Subject;
 use Illuminate\Http\Request;
@@ -28,6 +29,16 @@ Route::middleware('auth')->group(function(){
     foreach($request->all() as $key => $value) {
       Settings::set($key, $value);
     }
+  });
+
+  Route::group(['prefix' => 'reports'], function(){
+    Route::get('/', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/enrollment-report', [ReportController::class, 'enrollmentReport'])->name('reports.enrollmentReport');
+    Route::get('/subject-loading', [ReportController::class, 'subjectLoading'])->name('reports.subjectLoading');
+    Route::get('/attendance-report', [ReportController::class, 'attendanceReport'])->name('reports.attendanceReport');
+    Route::get('/academic-report', [ReportController::class, 'academicReport'])->name('reports.academicReport');
+    Route::get('/dropout-report', [ReportController::class, 'dropoutReport'])->name('reports.dropoutReport');
+    Route::get('/grade-report', [ReportController::class, 'gradeReport'])->name('reports.gradeReport');
   });
 
   Route::group(['prefix' => 'subjects'], function(){
