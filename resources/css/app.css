@@ -75,6 +75,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) sepia(79%) saturate(2476%) hue-rotate(190deg) brightness(118%) contrast(119%);
+  }
 }
 
 html, body, #app {
