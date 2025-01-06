@@ -137,4 +137,19 @@ class SubjectController extends Controller
       'activities' => $subject->activities->where('period', Settings::get('period'))->values()->toArray(),
       'students' => $subject->students->sortBy('last_name')->values()->toArray()]);
   }
+
+  public function delete() {
+
+  }
+
+  public function update(Request $request, Subject $subject) {
+    $subject->update([
+      'code' => $request->post('code'),
+      'title' => $request->post('title'),
+      'attendance_threshold' => $request->post('attendance_threshold'),
+      'dropout_threshold' => $request->post('dropout_threshold'),
+      'units_lab' => $request->post('units_lab'),
+      'units_lec' => $request->post('units_lec'),
+    ]);
+  }
 }

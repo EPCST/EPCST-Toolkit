@@ -30,7 +30,7 @@ class AttendanceStudent extends Pivot {
     });
 
     $droppedList = $results->filter(function($a) use ($subject) {
-      return ($a->absences >= $subject->dropout_threshold && !$a->hasRTC) || ($a->status === 'return' && $a->absences_after_return > 0) || $a->absences_after_return > 0;
+      return ($a->absences >= $subject->dropout_threshold && !$a->hasRTC) || ($a->status === 'return' && $a->absences_after_return > 0);
     });
 
     StudentSubject::whereIn('student_id', $droppedList->pluck('id'))->where('subject_id', $subject->id)->update([

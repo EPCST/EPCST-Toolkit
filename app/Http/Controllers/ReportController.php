@@ -43,7 +43,7 @@ class ReportController extends Controller {
   public function enrollmentReport() {
     $subjects = Subject::all();
 
-    return Inertia::render('Reports/Index', [
+    return Inertia::render('Reports/EnrollmentReport', [
       'report' => $subjects
     ]);
   }
@@ -52,21 +52,20 @@ class ReportController extends Controller {
   {
     $subjects = Subject::all();
 
-    return Inertia::render('Reports/Index', [
+    return Inertia::render('Reports/SubjectLoading', [
       'report' => $subjects
     ]);
   }
 
-  public function attendanceReport()
-  {
-    $startOfWeek = Carbon::now()->startOfWeek();
-    $endOfWeek = Carbon::now()->endOfWeek();
+  public function attendanceReport() {
+    $startOfWeek = Carbon::parse('2025-W02')->startOfWeek()->subDay();
+    $endOfWeek = Carbon::parse('2025-W02')->endOfWeek();
 
     $attendanceReport = DB::table('attendance_student_subject as ass')
       ->join('students', 'ass.student_id', '=', 'students.id')
       ->join('subjects', 'ass.subject_id', '=', 'subjects.id')
       ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
-      ->where('attendances.academic_year_id', 9)
+      ->where('attendances.academic_year_id', Settings::get('academic_year'))
       ->select(
         'students.id as student_id',
         'students.first_name',
@@ -124,6 +123,8 @@ class ReportController extends Controller {
           })->values()
         ];
       })->values();
+
+    dd($attendanceReport);
   }
 
 

@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function(){
     Route::get('/', [SubjectController::class, 'index'])->name('subjects.index');
     Route::get('/fetch', [SubjectController::class, 'fetchSubjects'])->name('subjects.fetchSubjects');
     Route::get('/{subject}', [SubjectController::class, 'show'])->name('subjects.show');
+    Route::post('/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+    Route::delete('/{subject}', [SubjectController::class, 'delete'])->name('subjects.delete');
     Route::get('/{subject}/attendances', [AttendanceController::class, 'index'])->name('subjects.attendances.index');
     Route::get('/{subject}/attendances/create', [AttendanceController::class, 'create'])->name('subjects.attendances.create');
     Route::post('/{subject}/attendances/create', [AttendanceController::class, 'store'])->name('subjects.attendances.store');
