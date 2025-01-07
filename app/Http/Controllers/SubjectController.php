@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\AttendanceStudent;
 use App\Models\Student;
+use App\Models\StudentSubject;
 use App\Models\Subject;
 use Exception;
 use Illuminate\Http\Request;
@@ -85,33 +86,37 @@ class SubjectController extends Controller
         'last_name'
       ]);
 
-      // Attach all students to subject in one query
-      $studentIds = Student::whereIn('student_no', $students->pluck('student_no'))->pluck('id');
+      // Create student_subject relationships
+      foreach($students as $student) {
+        StudentSubject::updateOrCreate(
+          [
+            'student_no' => $student['student_no'],
+            'subject_id' => $subject->id,
+            'academic_year_id' => $subject->academic_year_id,
+            'section_id' => $subject->section_id
+          ]
+        );
+      }
 
+      // Handle attendance records
+      $studentNos = $students->pluck('student_no');
       foreach($subject->attendances as $attendance) {
-        $missingIds = $studentIds->diff(AttendanceStudent::where('attendance_id', $attendance->id)->get()->pluck('student_id'))->toArray();
-        foreach($missingIds as $id) {
+        $missingNos = $studentNos->diff(
+          AttendanceStudent::where('attendance_id', $attendance->id)
+                          ->pluck('student_no')
+        )->toArray();
+        
+        foreach($missingNos as $studentNo) {
           AttendanceStudent::create([
-            'student_id' => $id,
+            'student_no' => $studentNo,  // Changed from student_id
             'attendance_id' => $attendance->id,
-            'subject_id' => $attendance->pivot->subject_id,
+            'subject_id' => $subject->id,
             'hours' => $attendance->hours,
             'status' => 'absent',
             'remarks' => 'Prefilled by System'
           ]);
         }
       }
-
-      // TODO: [Logic] I need to understand why exactly this works. AI made this.
-      $subject->students()->sync(
-        collect($studentIds)->mapWithKeys(function ($id) use ($subject) {
-          return [$id => [
-            'subject_id' => $subject->id,
-            'academic_year_id' => $subject->academic_year_id,
-            'section_id' => $subject->section_id
-          ]];
-        })
-      );
 
       return redirect()->back()->with([
         'subject' => $subject,

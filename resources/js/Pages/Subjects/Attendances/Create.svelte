@@ -32,8 +32,8 @@
   let studentAttendanceData = $state({});
 
   for(let student of subject.students) {
-    studentAttendanceData[student.id] = {
-      student_id: student.id,
+    studentAttendanceData[student.student_no] = {
+      student_no: student.student_no,
       status: student.pivot.status !== 'dropped' ? 'present' : 'absent',
       remarks: student.pivot.status === 'dropped' && student.pivot.returned_at ? 'System Dropped' : '',
       hours: 0,
@@ -156,13 +156,13 @@
       <tbody>
       {#each subject.students as student}
         {@const permanentDropped = student.pivot.status === 'dropped' && student.pivot.returned_at}
-        <tr class={studentAttendanceData[student.id].status === 'present' ? 'bg-green-400' : studentAttendanceData[student.id].status === 'absent' ? 'bg-red-400' : studentAttendanceData[student.id].status === 'excused' ? 'bg-blue-400' : 'bg-gray-400'}>
+        <tr class={studentAttendanceData[student.student_no].status === 'present' ? 'bg-green-400' : studentAttendanceData[student.student_no].status === 'absent' ? 'bg-red-400' : studentAttendanceData[student.student_no].status === 'excused' ? 'bg-blue-400' : 'bg-gray-400'}>
           <td class="p-2 border border-gray-400 bg-gray-200 sticky w-min text-nowrap overflow-ellipsis overflow-hidden left-0 z-10"><b>{student.last_name}</b>, {student.first_name}</td>
           <td class="border border-gray-400 min-w-[150px] text-center text-white" tabindex="-1" contenteditable="true">
-            <input disabled={permanentDropped} type="text" bind:value={studentAttendanceData[student.id].hours} onchange={(e) => studentAttendanceData[student.id].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
+            <input disabled={permanentDropped} type="text" bind:value={studentAttendanceData[student.student_no].hours} onchange={(e) => studentAttendanceData[student.student_no].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
           </td>
           <td class="border border-gray-400 text-center">
-            <select disabled={permanentDropped} bind:value={studentAttendanceData[student.id].status} onchange={(e) => updateAttendanceHours(student.id, e.target.value)} class="text-xs bg-transparent border-0 border-none">
+            <select disabled={permanentDropped} bind:value={studentAttendanceData[student.student_no].status} onchange={(e) => updateAttendanceHours(student.student_no, e.target.value)} class="text-xs bg-transparent border-0 border-none">
               <option value="present" selected>P</option>
               <option value="excused">E</option>
               <option value="absent">A</option>
@@ -170,7 +170,7 @@
             </select>
           </td>
           <td class="border border-gray-400 text-center">
-            <input type="text" disabled={permanentDropped} tabindex="-1" bind:value={studentAttendanceData[student.id].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
+            <input type="text" disabled={permanentDropped} tabindex="-1" bind:value={studentAttendanceData[student.student_no].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
           </td>
           {#if student.pivot.status === 'dropped' && !student.pivot.returned_at}
           <td class="border border-gray-400 text-center hs-tooltip">
@@ -178,7 +178,7 @@
               <span class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-white" role="tooltip">
                 Return to Class
               </span>
-              <input bind:checked={studentAttendanceData[student.id].return_to_class} type="checkbox" id="hs-large-switch-with-icons" class="peer relative w-[4.25rem] h-9 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-blue-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-blue-600 checked:border-blue-600 focus:checked:border-blue-600 before:inline-block before:w-8 before:h-8 before:bg-white checked:before:bg-blue-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200">
+              <input bind:checked={studentAttendanceData[student.student_no].return_to_class} type="checkbox" id="hs-large-switch-with-icons" class="peer relative w-[4.25rem] h-9 p-px bg-gray-100 border-transparent text-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:ring-blue-600 disabled:opacity-50 disabled:pointer-events-none checked:bg-none checked:text-blue-600 checked:border-blue-600 focus:checked:border-blue-600 before:inline-block before:w-8 before:h-8 before:bg-white checked:before:bg-blue-200 before:translate-x-0 checked:before:translate-x-full before:rounded-full before:shadow before:transform before:ring-0 before:transition before:ease-in-out before:duration-200">
               <label for="hs-large-switch-with-icons" class="sr-only">switch</label>
               <span class="peer-checked:text-white text-gray-500 size-8 absolute top-0.5 start-0.5 flex justify-center items-center pointer-events-none transition-colors ease-in-out duration-200 dark:text-neutral-500">
                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -11,11 +11,12 @@ return new class extends Migration {
   public function up(): void
   {
     Schema::create('attendance_student_subject', function (Blueprint $table) {
-      $table->id();
-      $table->foreignId('attendance_id')->constrained()->cascadeOnDelete();
-      $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-      $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
-      $table->unique(['attendance_id', 'student_id', 'subject_id']);
+      $table->uuid('id')->primary();
+      $table->foreignUuid('attendance_id')->constrained()->cascadeOnDelete();
+      $table->string('student_no');
+      $table->foreign('student_no')->references('student_no')->on('students')->cascadeOnDelete();
+      $table->foreignUuid('subject_id')->constrained()->cascadeOnDelete();
+      $table->unique(['attendance_id', 'student_no', 'subject_id']);
       $table->float('hours', 1);
       $table->enum('status', ['present', 'late', 'absent', 'excused']);
       $table->string('remarks')->nullable();

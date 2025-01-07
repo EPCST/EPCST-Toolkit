@@ -11,9 +11,10 @@ return new class extends Migration {
   public function up(): void
   {
     Schema::create('activity_student', function (Blueprint $table) {
-      $table->foreignId('activity_id')->constrained('activities')->cascadeOnDelete();
-      $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
-      $table->primary(['activity_id', 'student_id']);
+      $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
+      $table->string('student_no');
+      $table->foreign('student_no')->references('student_no')->on('students')->cascadeOnDelete();
+      $table->primary(['activity_id', 'student_no']);
       $table->float('score', 1)->nullable();
       $table->string('remarks')->nullable();
       $table->timestamps();

@@ -10,7 +10,8 @@ return new class extends Migration {
    */
   public function up(): void {
     Schema::create('student_subject', function (Blueprint $table) {
-      $table->foreignId('student_id')->constrained('students');
+      $table->string('student_no');
+      $table->foreign('student_no')->references('student_no')->on('students')->cascadeOnDelete();
       $table->unsignedBigInteger('subject_id');
       $table->unsignedInteger('academic_year_id');
       $table->unsignedInteger('section_id');

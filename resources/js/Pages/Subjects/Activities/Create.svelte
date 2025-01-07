@@ -16,7 +16,7 @@
   let studentsScores = {};
   for(let [key, student] of Object.entries(students)) {
     studentsScores[key] = {
-      id: student.id,
+      student_no: student.student_no,
       score: '',
       remarks: ''
     }
@@ -40,7 +40,7 @@
     $form.post(route('subjects.activities.store', {subject: subject.id}), {
       preserveScroll: true,
       onSuccess: () => {
-        toast.success("Activity created successfully", {
+        toast.success(`${type === 'activity' ? 'Activity' : 'Exam'} created successfully`, {
           position: 'bottom-right'
         });
 

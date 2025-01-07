@@ -13,10 +13,12 @@
 
   const { activity, subject, students } = $props();
 
+  const type = activity.type;
+
   let studentsScores = {};
   for(let [key, student] of Object.entries(students)) {
     studentsScores[key] = {
-      id: student.id,
+      student_no: student.student_no,
       score: student.score ?? '',
       remarks: student.pivot.remarks ?? ''
     }
@@ -55,7 +57,7 @@
     <div class="space-y-3 mb-4">
       <div class="grid w-full items-center gap-1.5">
         <Label for="title">Title</Label>
-        <Input type="text" bind:value={$form.title} id="title" placeholder="Title" />
+        <Input disabled={['prelim', 'midterm', 'final'].includes(type)} type="text" bind:value={$form.title} id="title" placeholder="Title" />
       </div>
       <div class="grid w-full items-center gap-1.5">
         <Label for="due_date">Due Date</Label>

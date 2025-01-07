@@ -10,7 +10,7 @@ return new class extends Migration {
    */
   public function up(): void {
     Schema::create('attendances', function (Blueprint $table) {
-      $table->id();
+      $table->uuid('id')->primary();
       $table->string('period');
       $table->integer('academic_year_id');
       $table->date('date');

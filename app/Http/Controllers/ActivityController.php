@@ -26,7 +26,7 @@ class ActivityController extends Controller {
 
     // Get all students from subject that aren't in the activity
     $studentsWithoutScores = $subject->students()
-      ->whereNotIn('students.id', $activity->students->pluck('id'))
+      ->whereNotIn('students.student_no', $activity->students->pluck('student_no'))
       ->get();
 
     // Merge both collections
@@ -52,13 +52,13 @@ class ActivityController extends Controller {
     foreach($request->post('studentsScores') as $student) {
       $upsertPayload[] = [
         'activity_id' => $activity['id'],
-        'student_id' => $student['id'],
+        'student_no' => $student['student_no'],
         'score' => $student['score'],
         'remarks' => $student['remarks']
       ];
     }
 
-    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_id'], update: ['score', 'remarks']);
+    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_no'], update: ['score', 'remarks']);
   }
 
   public function create(Request $request, Subject $subject) {
@@ -90,12 +90,12 @@ class ActivityController extends Controller {
     foreach($request->post('studentsScores') as $student) {
       $upsertPayload[] = [
         'activity_id' => $activity['id'],
-        'student_id' => $student['id'],
+        'student_no' => $student['student_no'],
         'score' => $student['score'],
         'remarks' => $student['remarks']
       ];
     }
 
-    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_id'], update: ['score', 'remarks']);
+    ActivityStudent::upsert($upsertPayload, uniqueBy: ['activity_id', 'student_no'], update: ['score', 'remarks']);
   }
 }

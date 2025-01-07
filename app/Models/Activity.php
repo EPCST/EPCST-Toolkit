@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Traits\HasUuid;
 
 class Activity extends Model {
+  use HasUuid;
+
   protected $guarded = [];
 
   protected $with = ['students'];
@@ -23,8 +26,8 @@ class Activity extends Model {
   }
 
   public function students(): BelongsToMany {
-    return $this->belongsToMany(Student::class)
+    return $this->belongsToMany(Student::class, 'activity_student', 'activity_id', 'student_no')
       ->using(ActivityStudent::class)
-      ->withPivot(['remarks', 'score']);
+      ->withPivot(['score', 'remarks']);
   }
 }

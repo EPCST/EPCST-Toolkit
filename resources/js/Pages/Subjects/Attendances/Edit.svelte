@@ -34,8 +34,8 @@
   let studentAttendanceData = $state({});
 
   for(let student of attendance.students) {
-    studentAttendanceData[student.id] = {
-      student_id: student.id,
+    studentAttendanceData[student.student_no] = {
+      student_no: student.student_no,
       status: student.pivot.status,
       remarks: student.pivot.remarks,
       hours: student.pivot.hours
@@ -154,13 +154,13 @@
       </thead>
       <tbody>
       {#each subject.students as student}
-        <tr class={studentAttendanceData[student.id].status === 'present' ? 'bg-green-400' : studentAttendanceData[student.id].status === 'absent' ? 'bg-red-400' : studentAttendanceData[student.id].status === 'excused' ? 'bg-blue-400' : 'bg-gray-400'}>
+        <tr class={studentAttendanceData[student.student_no].status === 'present' ? 'bg-green-400' : studentAttendanceData[student.student_no].status === 'absent' ? 'bg-red-400' : studentAttendanceData[student.student_no].status === 'excused' ? 'bg-blue-400' : 'bg-gray-400'}>
           <td class="p-2 border border-gray-400 bg-gray-200 sticky w-min text-nowrap overflow-ellipsis overflow-hidden left-0 z-10"><b>{student.last_name}</b>, {student.first_name}</td>
           <td class="border border-gray-400 min-w-[150px] text-center text-white" tabindex="-1" contenteditable="true">
-            <input type="text" bind:value={studentAttendanceData[student.id].hours} onchange={(e) => studentAttendanceData[student.id].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
+            <input type="text" bind:value={studentAttendanceData[student.student_no].hours} onchange={(e) => studentAttendanceData[student.student_no].status = 'late'} tabindex="-1" class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="0">
           </td>
           <td class="border border-gray-400 text-center">
-            <select bind:value={studentAttendanceData[student.id].status} onchange={(e) => updateAttendanceHours(student.id, e.target.value)} class="text-xs bg-transparent border-0 border-none">
+            <select bind:value={studentAttendanceData[student.student_no].status} onchange={(e) => updateAttendanceHours(student.student_no, e.target.value)} class="text-xs bg-transparent border-0 border-none">
               <option value="present" selected>P</option>
               <option value="excused">E</option>
               <option value="absent">A</option>
@@ -168,7 +168,7 @@
             </select>
           </td>
           <td class="border border-gray-400 text-center">
-            <input type="text" tabindex="-1" bind:value={studentAttendanceData[student.id].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
+            <input type="text" tabindex="-1" bind:value={studentAttendanceData[student.student_no].remarks} class="placeholder-white focus:border-0 focus:outline-none text-xs bg-transparent border-none outline-none text-white" placeholder="Remarks...">
           </td>
 <!--          <td class="border border-gray-400 text-center hs-tooltip">-->
 <!--            <div class="relative inline-block hs-tooltip-toggle">-->

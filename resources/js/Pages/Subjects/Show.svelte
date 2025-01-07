@@ -15,6 +15,20 @@
 
   let { attendances, activities, subject, students } = $props();
 
+  function getPeriodExam() {
+    const periodActivity = activities.find((a) => a.type === $page.props.app.settings.period);
+
+    return periodActivity
+      ? router.visit(route('subjects.activities.show', {
+        subject: subject.id,
+        activity: periodActivity.id
+      }), {replace: true})
+      : router.visit(route('subjects.activities.create', {
+        subject: subject.id,
+        type: $page.props.app.settings.period
+      }), {replace: true});
+  }
+
   const form = useForm({
     title: '',
     subject_id: $page.props.subject.id,
@@ -103,7 +117,7 @@
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}>PRELIM</a>-->
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}><Badge class="bg-blue-400 hover:bg-blue-700">MIDTERM</Badge></a>-->
 <!--        <a class="text-xs hover:text-blue-400 cursor-pointer" onclick={updatePeriod}>FINAL</a>-->
-        <Link href="{activities.some((a) => a.type === $page.props.app.settings.period) ? route('subjects.activities.show', {subject: subject.id, activity: activities.filter((a) => a.type === $page.props.app.settings.period)[0].id}) : route('subjects.activities.create', {subject: subject.id, type: $page.props.app.settings.period})}" class="text-xs hover:text-blue-400 cursor-pointer">View Exam</Link>
+        <button onclick="{getPeriodExam}" use:inertia class="text-xs hover:text-blue-400 cursor-pointer">View Exam</button>
       </div>
     </div>
     <div class="p-4 sm:p-5 bg-white border border-stone-200 rounded-xl shadow-sm">

@@ -10,8 +10,8 @@ return new class extends Migration {
    */
   public function up(): void {
     Schema::create('activities', function (Blueprint $table) {
-      $table->id();
-      $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
+      $table->uuid('id')->primary();
+      $table->foreignUuid('subject_id')->constrained('subjects')->cascadeOnDelete();
       $table->string('period');
       $table->integer('academic_year_id');
       $table->enum('type', ['activity', 'quiz', 'prelim', 'midterm', 'final']);
