@@ -105,7 +105,7 @@ class SubjectController extends Controller
           AttendanceStudent::where('attendance_id', $attendance->id)
                           ->pluck('student_no')
         )->toArray();
-        
+
         foreach($missingNos as $studentNo) {
           AttendanceStudent::create([
             'student_no' => $studentNo,  // Changed from student_id

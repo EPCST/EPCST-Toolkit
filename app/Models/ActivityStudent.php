@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Traits\Syncable;
 
-class ActivityStudent extends Pivot
-{
+class ActivityStudent extends Pivot {
+  use Syncable;
     protected $table = 'activity_student';
     protected $guarded = [];
 

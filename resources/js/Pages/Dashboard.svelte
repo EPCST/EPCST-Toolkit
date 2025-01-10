@@ -45,7 +45,7 @@
             <Card.Title class="text-2xl">3 hours ago</Card.Title>
           </Card.Content>
           <Card.Footer>
-            <Button size="sm" variant="outline" class="h-7 gap-1 text-sm">Sync</Button>
+            <Link href="{route('sync')}" size="sm" variant="outline" class="h-7 gap-1 text-sm">Sync</Link>
           </Card.Footer>
         </Card.Root>
         <!-- <Card.Root class="col-span-2 outline-red-400 outline">

@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Native\Laravel\Facades\Settings;
 use App\Traits\HasUuid;
+use App\Traits\Syncable;
 
 class Subject extends Model {
-  use HasUuid;
+  use HasUuid, Syncable;
+  
   protected $guarded = [];
   protected $with = ['students', 'activities', 'attendances'];
 

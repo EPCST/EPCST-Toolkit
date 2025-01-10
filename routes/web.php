@@ -8,6 +8,7 @@ use App\Http\Controllers\SubjectController;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Native\Laravel\Facades\Settings;
 
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function(){
       Settings::set($key, $value);
     }
   });
+
+  Route::get('/sync', function(Request $request){
+    dd(DB::connection()->getName());
+  })->name('sync');
 
   Route::group(['prefix' => 'reports'], function(){
     Route::get('/', [ReportController::class, 'index'])->name('reports.index');

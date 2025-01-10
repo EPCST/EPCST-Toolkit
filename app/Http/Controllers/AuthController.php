@@ -6,6 +6,8 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Native\Laravel\Facades\Notification;
@@ -25,6 +27,7 @@ class AuthController extends Controller {
 
     try {
       $userExists = User::where('username', $formFields['username'])->count() > 0;
+
       if($userExists) {
         if(Auth::attempt($formFields)) {
           return redirect()->route('dashboard');
@@ -43,6 +46,12 @@ class AuthController extends Controller {
       if(!empty($response['errors'])) {
         return inertia('Login', ['errors' => [
           'username' => $response['errors']['username'][0]
+        ]]);
+      }
+
+      if(!in_array($response['user']['role'], [User::ROLE_ADMIN, User::ROLE_TEACHER])) {
+        return inertia('Login', ['errors' => [
+          'username' => 'Unauthorized role. System is for admin and teacher only!'
         ]]);
       }
 

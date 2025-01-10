@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Traits\HasUuid;
-
+use App\Traits\Syncable;
 class AttendanceStudent extends Pivot {
-  use HasUuid;
+  use HasUuid, Syncable;
 
   protected $table = 'attendance_student_subject';
   protected $guarded = [];

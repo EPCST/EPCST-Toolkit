@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Traits\Syncable;
 
 class Student extends Model {
+  use Syncable;
+
   protected $keyType = 'string';
   protected $primaryKey = 'student_no';
   protected $with = ['attendances'];

@@ -10,7 +10,13 @@ return new class extends Migration {
    */
   public function up(): void
   {
-    Schema::create('activity_student', function (Blueprint $table) {
+    $connection = DB::connection()->getName();
+
+    Schema::create('activity_student', function (Blueprint $table) use ($connection) {
+      if($connection === 'registrar_sqlite') {
+        $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+      }
+
       $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
       $table->string('student_no');
       $table->foreign('student_no')->references('student_no')->on('students')->cascadeOnDelete();

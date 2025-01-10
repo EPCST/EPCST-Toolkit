@@ -9,7 +9,13 @@ return new class extends Migration {
    * Run the migrations.
    */
   public function up(): void {
-    Schema::create('attendances', function (Blueprint $table) {
+    $connection = DB::connection()->getName();
+
+    Schema::create('attendances', function (Blueprint $table) use ($connection) {
+      if($connection === 'registrar_sqlite') {
+        $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+      }
+
       $table->uuid('id')->primary();
       $table->string('period');
       $table->integer('academic_year_id');
