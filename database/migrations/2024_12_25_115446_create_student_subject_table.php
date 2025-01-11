@@ -12,13 +12,14 @@ return new class extends Migration {
     Schema::create('student_subject', function (Blueprint $table) {
       $table->string('student_no');
       $table->foreign('student_no')->references('student_no')->on('students')->cascadeOnDelete();
-      $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
+      $table->foreignUuid('subject_id')->constrained('subjects')->cascadeOnDelete();
       $table->unsignedInteger('academic_year_id');
       $table->unsignedInteger('section_id');
       $table->enum('status', ['dropped', 'active', 'return'])->default('active');
       $table->date('last_attendance_date')->nullable();
       $table->date('dropped_at')->nullable();
       $table->date('returned_at')->nullable();
+      $table->timestamps();
     });
   }
 

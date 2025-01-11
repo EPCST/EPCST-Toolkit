@@ -15,7 +15,7 @@ return new class extends Migration
 
       foreach($tables as $table) {
         Schema::table($table, function (Blueprint $table) {
-            $table->boolean('is_synced')->default(false);
+          $table->boolean('mark_deleted')->default(false);
         });
       }
     }

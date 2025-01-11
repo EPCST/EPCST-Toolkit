@@ -2,14 +2,14 @@
 
 namespace App\Observers;
 
+use Illuminate\Support\Carbon;
+
 class SyncableObserver {
   public function updated($model): void {
-    $model->is_synced = false;
-    $model->saveQuietly(); // Save without triggering observers again
   }
 
   public function deleted($model): void {
-    $model->is_synced = false;
+    $model->mark_deleted = true;
     $model->deleteQuietly();
   }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,10 @@ class AuthController extends Controller {
         'username' => $formFields['username'],
         'password' => $formFields['password']
       ]);
+
+      if($response['user']['role'] === 'admin') {
+        Artisan::call('db:init-registrar');
+      }
 
       Auth::loginUsingId($response['user']['id']);
 

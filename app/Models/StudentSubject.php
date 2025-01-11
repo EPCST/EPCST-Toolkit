@@ -7,7 +7,6 @@ use App\Traits\Syncable;
 
 class StudentSubject extends Pivot {
   use Syncable;
-  public $timestamps = false;
 
   protected $table = 'student_subject';
   protected $guarded = [];

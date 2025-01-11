@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Native\Laravel\Facades\Settings;
 
 class DatabaseSyncService
 {
@@ -16,12 +18,27 @@ class DatabaseSyncService
     'activities',
     'attendances',
     'activity_student',
-    'attendance_student_subject'
+    'attendance_student_subject',
+    'student_subject'
   ];
 
   public function __construct()
   {
-    $this->apiEndpoint = 'http://127.0.0.1:8000/api/sync';
+    $this->apiEndpoint = 'http://epcst-toolkit-sync.test/api/sync';
+  }
+
+  public function syncPull()
+  {
+    // Send data to remote endpoint
+    $response = Http::withHeaders([
+      'Content-Type' => 'application/json',
+    ])->get($this->apiEndpoint);
+
+    $response = json_decode($response->body(), true);
+
+    foreach($response as $key => $value) {
+      dd($response);
+    }
   }
 
   public function sync()
@@ -68,16 +85,19 @@ class DatabaseSyncService
 
   protected function getUnsyncedRecords($tableName): array
   {
-    return DB::table($tableName)
-      ->where('is_synced', false)
-      ->get()
+    $query = DB::table($tableName);
+
+    if(!is_null(Settings::get('last_sync_datetime'))) {
+      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_sync_datetime')));
+    }
+
+    return $query->get()
       ->map(function ($record) use ($tableName) {
         $data = (array) $record;
         if(!in_array($tableName, ['users', 'students'])) {
           $data['user_id'] = auth()->user()->id;
         }
 
-        unset($data['is_synced']);
         return $data;
       })
       ->toArray();
@@ -92,19 +112,17 @@ class DatabaseSyncService
 
     try {
       foreach ($syncData as $table => $records) {
-        $primaryKey = $this->getPrimaryKeyForTable($table);
-        $ids = array_column($records, $primaryKey);
-
-        DB::table($table)
-          ->whereIn($primaryKey, $ids)
-          ->update(['is_synced' => true]);
+        DB::table($table)->where('mark_deleted', true)->delete();
       }
 
       DB::commit();
+
     } catch (\Exception $e) {
       DB::rollBack();
       throw $e;
     }
+
+    Settings::set('last_sync_datetime', Carbon::now());
   }
 
   protected function getPrimaryKeyForTable($tableName)
@@ -118,7 +136,7 @@ class DatabaseSyncService
     $counts = [];
     foreach ($this->tables as $table) {
       $counts[$table] = DB::table($table)
-        ->where('is_synced', false)
+        ->where('updated_at', '>=', Settings::get('last_sync_datetime', 0))
         ->count();
     }
     return $counts;

@@ -5,6 +5,8 @@ use App\Http\Middleware\SetDatabaseConnection;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\App;
+use Native\Laravel\Http\Middleware\PreventRegularBrowserAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,10 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-      $middleware->web(append: [
+      $middlewareAppends = [
         HandleInertiaRequests::class,
         SetDatabaseConnection::class
-      ]);
+      ];
+
+      $middleware->web(append: $middlewareAppends);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
