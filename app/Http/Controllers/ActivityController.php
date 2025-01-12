@@ -70,7 +70,7 @@ class ActivityController extends Controller {
   }
 
   public function destroy(Request $request, Subject $subject, Activity $activity) {
-    $activity->update(['mark_deleted' => true]);
+    $activity->delete();
   }
 
   public function store(Request $request) {

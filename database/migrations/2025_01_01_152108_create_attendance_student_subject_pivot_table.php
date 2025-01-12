@@ -28,6 +28,7 @@ return new class extends Migration {
       $table->string('remarks')->nullable();
       $table->boolean('return_to_class')->default(false);
       $table->boolean('is_dropped')->default(false);
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

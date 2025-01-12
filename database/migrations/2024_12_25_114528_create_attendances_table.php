@@ -21,6 +21,7 @@ return new class extends Migration {
       $table->integer('academic_year_id');
       $table->date('date');
       $table->float('hours', 1)->comment('session length');
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

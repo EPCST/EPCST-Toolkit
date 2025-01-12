@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Native\Laravel\Facades\Settings;
 use App\Traits\HasUuid;
 use App\Traits\Syncable;
 
 class Subject extends Model {
-  use HasUuid, Syncable;
-  
+  use HasUuid, Syncable, SoftDeletes;
+
   protected $guarded = [];
   protected $with = ['students', 'activities', 'attendances'];
 

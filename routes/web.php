@@ -34,7 +34,7 @@ Route::middleware('auth')->group(function(){
 
   Route::get('/sync', function(Request $request){
     $dbs = new \App\Services\DatabaseSyncService();
-    $dbs->sync();
+    $dbs->syncPull();
   })->name('sync');
 
   Route::group(['prefix' => 'reports'], function(){

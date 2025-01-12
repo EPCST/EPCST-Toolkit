@@ -25,6 +25,7 @@ return new class extends Migration {
       $table->text('description')->nullable();
       $table->float('points', 1);
       $table->dateTime('due_date');
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

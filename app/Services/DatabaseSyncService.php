@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,7 @@ class DatabaseSyncService
 
   public function __construct()
   {
-    $this->apiEndpoint = 'http://epcst-toolkit-sync.test/api/sync';
+    $this->apiEndpoint = 'http://toolkit-sync.test/api/sync';
   }
 
   public function syncPull()
@@ -32,12 +33,50 @@ class DatabaseSyncService
     // Send data to remote endpoint
     $response = Http::withHeaders([
       'Content-Type' => 'application/json',
-    ])->get($this->apiEndpoint);
+    ])->get($this->apiEndpoint, [
+      'datetime' => Settings::get('last_pull_date')
+    ]);
 
-    $response = json_decode($response->body(), true);
+    $data = json_decode($response->body(), true);
 
-    foreach($response as $key => $value) {
-      dd($response);
+    try {
+      DB::beginTransaction();
+
+      foreach ($this->tables as $table) {
+        // Process tables in the correct order
+        if (empty($data[$table])) continue;
+
+        $records = $data[$table];
+
+        // Build raw SQL for better performance
+        $columns = array_keys($records[0]);
+
+        $values = collect($records)->map(function ($record) {
+          return '(' . collect($record)
+            ->map(fn($value) => is_null($value) ? 'NULL' : DB::getPdo()->quote($value))
+            ->join(', ') . ')';
+        })->join(', ');
+
+        DB::unprepared("
+          INSERT OR REPLACE INTO {$table} (" . implode(', ', $columns) . ")
+          VALUES {$values}
+        ");
+
+        DB::table($table)->whereNotNull('deleted_at')->delete();
+      }
+
+      DB::commit();
+
+      Settings::set('last_pull_date', Carbon::now());
+      return response()->json([
+        'message' => 'Data has been pulled successfully.'
+      ]);
+    } catch (Exception $e) {
+      DB::rollBack();
+      return response()->json([
+        'error' => 'Sync failed',
+        'message' => $e->getMessage()
+      ], 500);
     }
   }
 
@@ -112,7 +151,7 @@ class DatabaseSyncService
 
     try {
       foreach ($syncData as $table => $records) {
-        DB::table($table)->where('mark_deleted', true)->delete();
+        DB::table($table)->whereNotNull('deleted_at')->delete();
       }
 
       DB::commit();

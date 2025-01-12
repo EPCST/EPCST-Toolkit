@@ -18,6 +18,7 @@ return new class extends Migration {
       $table->string('course_name');
       $table->string('email');
       $table->string('date_of_birth');
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

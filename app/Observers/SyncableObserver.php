@@ -9,7 +9,6 @@ class SyncableObserver {
   }
 
   public function deleted($model): void {
-    $model->mark_deleted = true;
     $model->deleteQuietly();
   }
 

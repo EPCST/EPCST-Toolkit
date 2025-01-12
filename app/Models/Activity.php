@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Traits\HasUuid;
 use App\Traits\Syncable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Activity extends Model {
-  use HasUuid, Syncable;
+  use HasUuid, Syncable, SoftDeletes;
 
   protected $guarded = [];
 

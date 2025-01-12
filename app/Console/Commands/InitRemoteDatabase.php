@@ -14,8 +14,6 @@ class InitRemoteDatabase extends Command
 
   public function handle()
   {
-    $this->info('Remote SQLite database initialized at: ' . $path);
-
     // Run migrations on the new database
     $this->call('migrate:fresh', [
       '--database' => 'registrar_sqlite',

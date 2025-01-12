@@ -6,6 +6,7 @@
   import {onMount} from 'svelte';
   import {Link, page, router} from '@inertiajs/svelte';
   import {ChevronLeft, EllipsisVertical, Eye, FileMinus} from "lucide-svelte";
+  import {toast} from "svelte-sonner";
 
   // On mount make sure that we initialize Preline JS.
   onMount(() => {
@@ -16,7 +17,12 @@
 
   function removeActivity(id) {
     router.visit(route('subjects.activities.destroy', {subject: subject.id, activity: id}), {
-      method: "delete"
+      method: "delete",
+      onSuccess: () => {
+        toast.success(`Activity / Exam deleted successfully`, {
+          position: 'bottom-right'
+        });
+      }
     })
   }
 </script>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\DatabaseSyncService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -31,6 +32,11 @@ class AuthController extends Controller {
 
       if($userExists) {
         if(Auth::attempt($formFields)) {
+          if(auth()->user()->role === 'admin') {
+            $dbs = new DatabaseSyncService();
+            $dbs->syncPull();
+          }
+
           return redirect()->route('dashboard');
         }
 

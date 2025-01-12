@@ -28,6 +28,7 @@ return new class extends Migration {
       $table->integer('units_lec')->default(0);
       $table->integer('attendance_threshold')->default(5);
       $table->integer('dropout_threshold')->default(10);
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

@@ -4,19 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use App\Traits\Syncable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivityStudent extends Pivot {
-  use Syncable;
-    protected $table = 'activity_student';
-    protected $guarded = [];
+  use Syncable, SoftDeletes;
 
-    public function student()
-    {
-        return $this->belongsTo(Student::class, 'student_no', 'student_no');
-    }
+  protected $table = 'activity_student';
+  protected $guarded = [];
 
-    public function activity()
-    {
-        return $this->belongsTo(Activity::class, 'activity_id', 'id');
-    }
+  public function student()
+  {
+      return $this->belongsTo(Student::class, 'student_no', 'student_no');
+  }
+
+  public function activity()
+  {
+      return $this->belongsTo(Activity::class, 'activity_id', 'id');
+  }
 }

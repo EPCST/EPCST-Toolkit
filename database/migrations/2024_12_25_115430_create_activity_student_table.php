@@ -23,6 +23,7 @@ return new class extends Migration {
       $table->primary(['activity_id', 'student_no']);
       $table->float('score', 1)->nullable();
       $table->string('remarks')->nullable();
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }
