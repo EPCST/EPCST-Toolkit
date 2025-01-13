@@ -42,6 +42,8 @@ class HandleInertiaRequests extends Middleware
       'app' => [
         'version' => env('NATIVEPHP_APP_VERSION', '1.0.0'),
         'settings' => [
+          'last_push_date' => Settings::get('last_push_date'),
+          'last_pull_date' => Settings::get('last_pull_date'),
           'academic_years' => Settings::get('academic_years'),
           'academic_year' => Settings::get('academic_year'),
           'period' => Settings::get('period', 'prelim')

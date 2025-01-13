@@ -7,7 +7,9 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubjectController;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Native\Laravel\Facades\Settings;
 
@@ -20,8 +22,11 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function(){
   Route::get('/dashboard', function(Request $request) {
+    $lastSync = auth()->user()->role === 'admin' ? Carbon::parse(Settings::get('last_pull_date'))->diffForHumans() : Carbon::parse(Settings::get('last_sync_date'))->diffForHumans();
+
     return inertia('Dashboard', [
-      'subjectCount' => Subject::count()
+      'subjectCount' => Subject::count(),
+      'lastSync' => $lastSync
     ]);
   })->name('dashboard');
 
@@ -30,6 +35,22 @@ Route::middleware('auth')->group(function(){
       Settings::set($key, $value);
     }
   });
+
+  Route::get('/sync', function(Request $request){
+    $dbs = new \App\Services\DatabaseSyncService();
+    $response = [
+      'message' => 'Sync failed.'
+    ];
+
+    if(auth()->user()->role === 'admin') {
+      $response = $dbs->syncPull();
+    }
+    else if(auth()->user()->role === 'teacher') {
+      $response = $dbs->sync();
+    }
+
+    return response()->json($response);
+  })->name('sync');
 
   Route::group(['prefix' => 'reports'], function(){
     Route::get('/', [ReportController::class, 'index'])->name('reports.index');

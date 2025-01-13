@@ -5,9 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-
+use App\Traits\Syncable;
 /**
  *
  *
@@ -51,8 +52,18 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable
 {
+  // Define role constants
+  const ROLE_ADMIN = 1;
+  const ROLE_TEACHER = 2;
+
+  // Role mapping array
+  protected static array $roleMap = [
+    self::ROLE_ADMIN => 'admin',
+    self::ROLE_TEACHER => 'teacher',
+  ];
+
   /** @use HasFactory<\Database\Factories\UserFactory> */
-  use HasFactory, Notifiable, HasUuid;
+  use HasFactory, Notifiable, HasUuid, Syncable, SoftDeletes;
 
 
   /**
@@ -62,6 +73,7 @@ class User extends Authenticatable
    */
   protected $fillable = [
     'id',
+    'role',
     'first_name',
     'last_name',
     'middle_name',
@@ -93,5 +105,13 @@ class User extends Authenticatable
       'email_verified_at' => 'datetime',
       'password' => 'hashed',
     ];
+  }
+
+  /**
+   * Get the user's role name
+   */
+  public function getRoleAttribute($value): string
+  {
+    return static::$roleMap[$value] ?? 'student';
   }
 }

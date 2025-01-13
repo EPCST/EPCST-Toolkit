@@ -42,10 +42,10 @@
         <Card.Root>
           <Card.Content>
             <Card.Description>Last Sync</Card.Description>
-            <Card.Title class="text-2xl">3 hours ago</Card.Title>
+            <Card.Title class="text-2xl">{$page.props.lastSync}</Card.Title>
           </Card.Content>
           <Card.Footer>
-            <Button size="sm" variant="outline" class="h-7 gap-1 text-sm">Sync</Button>
+            <Link href="{route('sync')}" size="sm" variant="outline" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync</Link>
           </Card.Footer>
         </Card.Root>
         <!-- <Card.Root class="col-span-2 outline-red-400 outline">

@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Traits\HasUuid;
+use App\Traits\Syncable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model {
-  use HasUuid;
+  use HasUuid, Syncable, SoftDeletes;
 
   protected $guarded = ['id'];
 

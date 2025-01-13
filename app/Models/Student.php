@@ -5,8 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Traits\Syncable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model {
+  use Syncable, SoftDeletes;
+
   protected $keyType = 'string';
   protected $primaryKey = 'student_no';
   protected $with = ['attendances'];

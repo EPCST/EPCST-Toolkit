@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\DatabaseSyncService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Native\Laravel\Facades\Notification;
@@ -25,8 +29,14 @@ class AuthController extends Controller {
 
     try {
       $userExists = User::where('username', $formFields['username'])->count() > 0;
+
       if($userExists) {
         if(Auth::attempt($formFields)) {
+          if(auth()->user()->role === 'admin') {
+            $dbs = new DatabaseSyncService();
+            $dbs->syncPull();
+          }
+
           return redirect()->route('dashboard');
         }
 
@@ -46,6 +56,12 @@ class AuthController extends Controller {
         ]]);
       }
 
+      if(!in_array($response['user']['role'], [User::ROLE_ADMIN, User::ROLE_TEACHER])) {
+        return inertia('Login', ['errors' => [
+          'username' => 'Unauthorized role. System is for admin and teacher only!'
+        ]]);
+      }
+
       User::create([
         'id' => $response['user']['id'],
         'role' => $response['user']['role'],
@@ -56,6 +72,10 @@ class AuthController extends Controller {
         'username' => $formFields['username'],
         'password' => $formFields['password']
       ]);
+
+      if($response['user']['role'] === 'admin') {
+        Artisan::call('db:init-registrar');
+      }
 
       Auth::loginUsingId($response['user']['id']);
 

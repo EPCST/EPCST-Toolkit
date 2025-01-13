@@ -9,7 +9,13 @@ return new class extends Migration {
    * Run the migrations.
    */
   public function up(): void {
-    Schema::create('subjects', function (Blueprint $table) {
+    $connection = DB::connection()->getName();
+
+    Schema::create('subjects', function (Blueprint $table) use ($connection) {
+      if($connection === 'registrar_sqlite') {
+        $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+      }
+
       $table->uuid('id')->primary();
       $table->unsignedInteger('subject_id');
       $table->unsignedInteger('academic_year_id');
@@ -22,6 +28,7 @@ return new class extends Migration {
       $table->integer('units_lec')->default(0);
       $table->integer('attendance_threshold')->default(5);
       $table->integer('dropout_threshold')->default(10);
+      $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
     });
   }

@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use App\Traits\HasUuid;
+use App\Traits\Syncable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StudentSubject extends Pivot {
-  public $timestamps = false;
+  use Syncable, SoftDeletes;
 
   protected $table = 'student_subject';
   protected $guarded = [];
