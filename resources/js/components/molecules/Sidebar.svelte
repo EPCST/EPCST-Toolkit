@@ -70,6 +70,7 @@ function updateSetting(e) {
       </Tooltip.Trigger>
       <Tooltip.Content side="right">Dashboard</Tooltip.Content>
     </Tooltip.Root>
+    {#if $page.props.auth.user.role !== 'admin'}
     <Tooltip.Root>
       <Tooltip.Trigger asChild let:builder>
         <a
@@ -85,6 +86,9 @@ function updateSetting(e) {
       </Tooltip.Trigger>
       <Tooltip.Content side="right">Sections</Tooltip.Content>
     </Tooltip.Root>
+    {/if}
+
+    {#if $page.props.auth.user.role !== 'admin'}
     <Tooltip.Root>
       <Tooltip.Trigger asChild let:builder>
         <a
@@ -100,6 +104,7 @@ function updateSetting(e) {
       </Tooltip.Trigger>
       <Tooltip.Content side="right">Reports</Tooltip.Content>
     </Tooltip.Root>
+    {/if}
 <!--    <Tooltip.Root>-->
 <!--      <Tooltip.Trigger asChild let:builder>-->
 <!--        <a-->
@@ -161,7 +166,7 @@ function updateSetting(e) {
       <DropdownMenu.Content align="end">
         <DropdownMenu.Label>
           <p>{$page.props.auth.user.first_name} {$page.props.auth.user.last_name}</p>
-          <p class="text-muted-foreground text-xs">Teacher</p>
+          <p class="text-muted-foreground text-xs">{$page.props.auth.user.role.toUpperCase()}</p>
         </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Item>Settings</DropdownMenu.Item>

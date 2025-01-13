@@ -126,8 +126,8 @@ class DatabaseSyncService
   {
     $query = DB::table($tableName);
 
-    if(!is_null(Settings::get('last_sync_datetime'))) {
-      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_sync_datetime')));
+    if(!is_null(Settings::get('last_sync_date'))) {
+      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_sync_date')));
     }
 
     return $query->get()
@@ -161,7 +161,7 @@ class DatabaseSyncService
       throw $e;
     }
 
-    Settings::set('last_sync_datetime', Carbon::now());
+    Settings::set('last_sync_date', Carbon::now());
   }
 
   protected function getPrimaryKeyForTable($tableName)
@@ -175,7 +175,7 @@ class DatabaseSyncService
     $counts = [];
     foreach ($this->tables as $table) {
       $counts[$table] = DB::table($table)
-        ->where('updated_at', '>=', Settings::get('last_sync_datetime', 0))
+        ->where('updated_at', '>=', Settings::get('last_sync_date', 0))
         ->count();
     }
     return $counts;
