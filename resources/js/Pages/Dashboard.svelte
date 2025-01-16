@@ -38,6 +38,13 @@
       }
     })
   }
+
+  let extra = {};
+  if($page.props.auth.user.role === 'admin') {
+    let academicYear = $page.props.app.settings.academic_years.find((el) => el.id === $page.props.app.settings.academic_year);
+
+    extra['activeSchoolYear'] = academicYear['school_year'] + ' / ' + academicYear['semester'];
+  }
 </script>
 
 <div class="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
@@ -46,12 +53,9 @@
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card.Root>
           <Card.Content>
-            <Card.Description>My Classes</Card.Description>
-            <Card.Title class="text-2xl">{$page.props.subjectCount}</Card.Title>
+            <Card.Description>Active SY / Semester</Card.Description>
+            <Card.Title class="text-2xl">{extra['activeSchoolYear'] ?? ''}</Card.Title>
           </Card.Content>
-          <Card.Footer>
-            <Link href={route('subjects.index')} class="text-xs hover:text-blue-700 text-blue-600">View All Subjects</Link>
-          </Card.Footer>
         </Card.Root>
         <Card.Root>
           <Card.Content>
