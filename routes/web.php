@@ -25,7 +25,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function(){
   Route::get('/dashboard', function(Request $request) {
     $isAdmin = auth()->user()->role === 'admin';
-    $lastSync = $isAdmin ? Carbon::parse(Settings::get('last_pull_date'))->diffForHumans() : Carbon::parse(Settings::get('last_sync_date'))->diffForHumans();
+    $lastSync = $isAdmin ? Carbon::parse(Settings::get('last_pull_date'))->diffForHumans() : Carbon::parse(Settings::get('last_push_date'))->diffForHumans();
 
     $extra = [];
     if($isAdmin) {
@@ -60,8 +60,6 @@ Route::middleware('auth')->group(function(){
     else if(auth()->user()->role === 'teacher') {
       $response = $dbs->sync();
     }
-
-    $response = json_decode($response->getContent(), true);
 
     return redirect()->back()->with($response);
   })->name('sync');

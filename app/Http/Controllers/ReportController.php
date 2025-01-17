@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -50,10 +51,12 @@ class ReportController extends Controller {
 
   public function subjectLoading()
   {
+    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->get()->toArray();
     $subjects = Subject::all();
 
     return Inertia::render('Reports/SubjectLoading', [
-      'report' => $subjects
+      'report' => $subjects->groupBy('user_id'),
+      'teachers' => $teachers
     ]);
   }
 

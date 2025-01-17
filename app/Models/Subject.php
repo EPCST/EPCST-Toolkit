@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,6 +28,10 @@ class Subject extends Model {
     return $this->belongsToMany(Attendance::class, 'attendance_student_subject', 'subject_id', 'attendance_id')
                 ->withPivot(['student_no', 'is_dropped', 'return_to_class', 'hours', 'status', 'remarks'])
                 ->groupBy('attendances.id');
+  }
+
+  public function teacher(): BelongsTo {
+    return $this->belongsTo(User::class, 'user_id')->select('id', 'first_name', 'last_name', 'middle_name', 'email', 'department');
   }
 
   public function activities(): HasMany {
