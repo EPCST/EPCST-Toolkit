@@ -52,7 +52,7 @@ class ReportController extends Controller {
   public function subjectLoading()
   {
     $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->get()->toArray();
-    $subjects = Subject::all();
+    $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get();
 
     return Inertia::render('Reports/SubjectLoading', [
       'report' => $subjects->groupBy('user_id'),
@@ -65,12 +65,18 @@ class ReportController extends Controller {
     $endOfWeek = Carbon::parse('2025-W02')->endOfWeek();
 
     $attendanceReport = DB::table('attendance_student_subject as ass')
-      ->join('students', 'ass.student_id', '=', 'students.id')
+      ->join('students', 'ass.student_no', '=', 'students.student_no')
       ->join('subjects', 'ass.subject_id', '=', 'subjects.id')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
       ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
       ->where('attendances.academic_year_id', Settings::get('academic_year'))
       ->select(
-        'students.id as student_id',
+        'users.id as teacher_id',
+        'users.first_name as teacher_first_name',
+        'users.middle_name as teacher_middle_name',
+        'users.last_name as teacher_last_name',
+        'users.department as teacher_department',
+        'students.student_no as student_no',
         'students.first_name',
         'students.last_name',
         'subjects.id as subject_id',
@@ -83,7 +89,7 @@ class ReportController extends Controller {
             SELECT COALESCE(SUM(ass2.hours), 0)
             FROM attendance_student_subject ass2
             JOIN attendances a2 ON ass2.attendance_id = a2.id
-            WHERE ass2.student_id = students.id
+            WHERE ass2.student_no = students.student_no
             AND ass2.subject_id = subjects.id
             AND DATE(a2.date) BETWEEN '{$startOfWeek}' AND '{$endOfWeek}'
         ) as absences_this_week"),
@@ -92,13 +98,14 @@ class ReportController extends Controller {
             SELECT COALESCE(SUM(ass2.hours), 0)
             FROM attendance_student_subject ass2
             JOIN attendances a2 ON ass2.attendance_id = a2.id
-            WHERE ass2.student_id = students.id
+            WHERE ass2.student_no = students.student_no
             AND ass2.subject_id = subjects.id
             AND DATE(a2.date) < '{$startOfWeek}'
         ) as absences_before")
       )
       ->groupBy(
-        'students.id',
+        'users.id',
+        'students.student_no',
         'students.first_name',
         'students.last_name',
         'subjects.id',
@@ -106,26 +113,43 @@ class ReportController extends Controller {
         'subjects.code',
         'subjects.section'
       )
-      ->orderBy('subjects.title')
       ->orderBy('students.last_name')
+      ->orderBy('subjects.title')
       ->get()
-      ->groupBy('subject_id')
-      ->map(function ($studentsInSubject) {
+      ->groupBy('student_no')
+      ->mapWithKeys(function ($studentSubjects) {
+        $firstRecord = $studentSubjects->first();
         return [
-          'subject_name' => $studentsInSubject->first()->subject_name,
-          'subject_code' => $studentsInSubject->first()->subject_code,
-          'section' => $studentsInSubject->first()->section,
-          'students' => $studentsInSubject->map(function ($record) {
-            return [
-              'id' => $record->student_id,
-              'first_name' => $record->first_name,
-              'last_name' => $record->last_name,
-              'absences_this_week' => (float)$record->absences_this_week,
-              'absences_before' => (float)$record->absences_before,
-            ];
-          })->values()
+          $firstRecord->student_no => [
+            'student' => [
+              'first_name' => $firstRecord->first_name,
+              'last_name' => $firstRecord->last_name,
+            ],
+            'subjects' => $studentSubjects->map(function ($record) {
+              return [
+                'code' => $record->subject_code,
+                'title' => $record->subject_name,
+                'section' => $record->section,
+                'teacher' => [
+                  'first_name' => $record->teacher_first_name,
+                  'middle_name' => $record->teacher_middle_name,
+                  'last_name' => $record->teacher_last_name,
+                  'department' => $record->teacher_department
+                ],
+                'absences_this_week' => (float)$record->absences_this_week,
+                'absences_before' => (float)$record->absences_before,
+                'absences' => [
+                  [
+                    'date' => now()->toDateString(),
+                    'status' => 'present',
+                    'hours' => 0
+                  ]
+                ]
+              ];
+            })->values()
+          ]
         ];
-      })->values();
+      });
 
     dd($attendanceReport);
   }
