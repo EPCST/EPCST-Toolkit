@@ -10,10 +10,14 @@
   import * as Select from "$lib/components/ui/select/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
   import {Bird, Rabbit, Turtle} from "lucide-svelte";
+  import {onMount} from "svelte";
 
   const {report, teachers} = $props();
 
-  console.log(report);
+  // On mount make sure that we initialize Preline JS.
+  onMount(() => {
+    window.HSStaticMethods.autoInit();
+  });
 
   const {
     semester,
@@ -77,13 +81,6 @@
                     {#if units_lab}({units_lab}){/if}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{section}</td>
-                </tr>
-              {/each}
-              {#each Array(Math.max(Object.keys(report).length, 10 - Object.keys(report).length)) as _, i}
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"></td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"></td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border"></td>
                 </tr>
               {/each}
               </tbody>

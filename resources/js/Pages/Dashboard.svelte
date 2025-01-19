@@ -101,7 +101,7 @@
                   <Badge>One Time</Badge>
                 </Table.Cell>
                 <Table.Cell class="text-right flex justify-end items-center gap-2">
-                  <Link href="{route('reports.subjectLoading')}" variant="outline" size="icon" class="bg-blue-600 hover:bg-blue-700 text-white hover:text-white">
+                  <Link class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{route('reports.subjectLoading')}" variant="outline" size="icon">
                     <Eye size={16} class="w-auto"/>
                   </Link>
                 </Table.Cell>
