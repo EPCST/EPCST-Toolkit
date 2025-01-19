@@ -108,7 +108,9 @@ class AttendanceController extends Controller
         'id' => Str::uuid()->toString(),
         'attendance_id' => $attendance->id,
         'subject_id' => $subject->id,
-        ...$studentAttendance
+        'created_at' => Carbon::now(),
+        'updated_at' => Carbon::now(),
+        ...$studentAttendance,
       ];
     }
 
