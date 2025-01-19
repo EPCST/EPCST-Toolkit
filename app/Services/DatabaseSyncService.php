@@ -100,14 +100,13 @@ class DatabaseSyncService
 
       // Send data to remote endpoint
       $response = Http::withHeaders([
-//        'Authorization' => 'Bearer ' . config('services.sync.token'),
         'Content-Type' => 'application/json',
       ])->post($this->apiEndpoint, [
         'data' => $syncData,
         'timestamp' => now()->toIso8601String()
       ]);
 
-      dd($response->body());
+      $jsonResponse = $response->json();
 
       if($response->successful()) {
         // Mark records as synced
@@ -130,7 +129,7 @@ class DatabaseSyncService
     $query = DB::table($tableName);
 
     if(!is_null(Settings::get('last_push_date'))) {
-      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_sync_date')));
+      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_push_date')));
     }
 
     return $query->get()

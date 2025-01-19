@@ -50,18 +50,16 @@ Route::middleware('auth')->group(function(){
 
   Route::get('/sync', function(Request $request){
     $dbs = new \App\Services\DatabaseSyncService();
-    $response = [
-      'message' => 'Sync failed.'
-    ];
-
     if(auth()->user()->role === 'admin') {
-      $response = $dbs->syncPull();
+      $dbs->syncPull();
     }
     else if(auth()->user()->role === 'teacher') {
-      $response = $dbs->sync();
+      $dbs->sync();
     }
 
-    return redirect()->back()->with($response);
+    return redirect()->back()->with([
+
+    ]);
   })->name('sync');
 
   Route::group(['prefix' => 'reports'], function(){

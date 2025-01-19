@@ -42,7 +42,7 @@ return [
     ],
     'registrar_sqlite' => [
       'driver' => 'sqlite',
-      'database' => env('REGISTRAR_DB_DATABASE', database_path('database.sqlite')),
+      'database' => env('REGISTRAR_DB_DATABASE', database_path('registrar.sqlite')),
       'prefix' => '',
       'foreign_key_constraints' => env('REGISTRAR_DB_FOREIGN_KEYS', true),
       'busy_timeout' => null,
