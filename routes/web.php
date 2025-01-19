@@ -5,11 +5,13 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SubjectController;
+use App\Models\Activity;
+use App\Models\Attendance;
 use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Native\Laravel\Facades\Settings;
 
@@ -22,11 +24,21 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function(){
   Route::get('/dashboard', function(Request $request) {
-    $lastSync = auth()->user()->role === 'admin' ? Carbon::parse(Settings::get('last_pull_date'))->diffForHumans() : Carbon::parse(Settings::get('last_sync_date'))->diffForHumans();
+    $isAdmin = auth()->user()->role === 'admin';
+    $lastSync = $isAdmin ? Carbon::parse(Settings::get('last_pull_date'))->diffForHumans() : Carbon::parse(Settings::get('last_push_date'))->diffForHumans();
+
+    $extra = [];
+    if($isAdmin) {
+      $extra['users'] = User::where('role', 2)->get();
+      $extra['subjects'] = Subject::all()->groupBy('user_id');
+      $extra['activities'] = Activity::all()->groupBy('user_id');
+      $extra['attendances'] = Attendance::all()->groupBy('user_id');
+    }
 
     return inertia('Dashboard', [
       'subjectCount' => Subject::count(),
-      'lastSync' => $lastSync
+      'lastSync' => $lastSync,
+      ...$extra
     ]);
   })->name('dashboard');
 
@@ -38,18 +50,16 @@ Route::middleware('auth')->group(function(){
 
   Route::get('/sync', function(Request $request){
     $dbs = new \App\Services\DatabaseSyncService();
-    $response = [
-      'message' => 'Sync failed.'
-    ];
-
     if(auth()->user()->role === 'admin') {
-      $response = $dbs->syncPull();
+      $dbs->syncPull();
     }
     else if(auth()->user()->role === 'teacher') {
-      $response = $dbs->sync();
+      $dbs->sync();
     }
 
-    return response()->json($response);
+    return redirect()->back()->with([
+
+    ]);
   })->name('sync');
 
   Route::group(['prefix' => 'reports'], function(){

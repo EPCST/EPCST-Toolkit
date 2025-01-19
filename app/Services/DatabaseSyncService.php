@@ -100,16 +100,18 @@ class DatabaseSyncService
 
       // Send data to remote endpoint
       $response = Http::withHeaders([
-//        'Authorization' => 'Bearer ' . config('services.sync.token'),
         'Content-Type' => 'application/json',
       ])->post($this->apiEndpoint, [
         'data' => $syncData,
         'timestamp' => now()->toIso8601String()
       ]);
 
+      $jsonResponse = $response->json();
+
       if($response->successful()) {
         // Mark records as synced
         $this->markAsSynced($syncData);
+        Settings::set('last_push_date', Carbon::now());
         return ['success' => true, 'message' => 'Sync completed successfully'];
       }
 
@@ -126,8 +128,8 @@ class DatabaseSyncService
   {
     $query = DB::table($tableName);
 
-    if(!is_null(Settings::get('last_sync_date'))) {
-      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_sync_date')));
+    if(!is_null(Settings::get('last_push_date'))) {
+      $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_push_date')));
     }
 
     return $query->get()
@@ -161,7 +163,12 @@ class DatabaseSyncService
       throw $e;
     }
 
-    Settings::set('last_sync_date', Carbon::now());
+    if(auth()->user()->role === 'admin') {
+      Settings::set('last_pull_date', Carbon::now());
+    }
+    else {
+      Settings::set('last_push_date', Carbon::now());
+    }
   }
 
   protected function getPrimaryKeyForTable($tableName)
