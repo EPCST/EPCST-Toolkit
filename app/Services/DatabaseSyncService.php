@@ -25,7 +25,13 @@ class DatabaseSyncService
 
   public function __construct()
   {
-    $this->apiEndpoint = 'http://toolkit-sync.test/api/sync';
+    $this->apiEndpoint = 'https://toolkit.programinity.io/api/sync';
+//    if(app()->environment('production')) {
+//      $this->apiEndpoint = 'https://toolkit.programinity.io/api/sync';
+//    }
+//    else {
+//      $this->apiEndpoint = 'http://toolkit-sync.test/api/sync';
+//    }
   }
 
   public function syncPull()
@@ -107,6 +113,10 @@ class DatabaseSyncService
       ]);
 
       $jsonResponse = $response->json();
+
+      if(isset($jsonResponse['error'])) {
+        return ['success' => false, 'message' => $jsonResponse['error']];
+      }
 
       if($response->successful()) {
         // Mark records as synced
