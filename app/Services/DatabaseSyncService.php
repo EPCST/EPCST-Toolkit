@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 use Native\Laravel\Facades\Settings;
 
 class DatabaseSyncService
@@ -34,14 +35,21 @@ class DatabaseSyncService
 //    }
   }
 
-  public function syncPull()
+  public function syncPull(Request $request)
   {
     // Send data to remote endpoint
-    $response = Http::withHeaders([
-      'Content-Type' => 'application/json',
-    ])->get($this->apiEndpoint, [
-      'datetime' => Settings::get('last_pull_date')
-    ]);
+    if($request->has('force') && $request->get('force')) {
+      $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+      ])->get($this->apiEndpoint);
+    }
+    else {
+      $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+      ])->get($this->apiEndpoint, [
+        'datetime' => Settings::get('last_pull_date')
+      ]);
+    }
 
     $data = json_decode($response->body(), true);
 
@@ -86,14 +94,13 @@ class DatabaseSyncService
     }
   }
 
-  public function sync()
-  {
+  public function sync(Request $request) {
     try {
       $syncData = [];
 
       // Collect all unsynced data
       foreach ($this->tables as $table) {
-        $records = $this->getUnsyncedRecords($table);
+        $records = $this->getUnsyncedRecords($table, $request->get('force'));
 
         if(!empty($records)) {
           $syncData[$table] = $records;
@@ -134,11 +141,11 @@ class DatabaseSyncService
     }
   }
 
-  protected function getUnsyncedRecords($tableName): array
+  protected function getUnsyncedRecords($tableName, $force = false): array
   {
     $query = DB::table($tableName);
 
-    if(!is_null(Settings::get('last_push_date'))) {
+    if(!$force && !is_null(Settings::get('last_push_date'))) {
       $query->where('updated_at', '>=', Carbon::parse(Settings::get('last_push_date')));
     }
 

@@ -39,7 +39,7 @@
   </div>
   <div class="-m-1.5 overflow-x-auto">
     <div class="p-1.5 min-w-full inline-block align-middle">
-      {#each teachers.sort((a, b) => a.id - b.id) as teacher}
+      {#each (teachers ?? []).sort((a, b) => a.id - b.id) as teacher}
       <div class="hs-accordion bg-white border -mt-px">
         <button class="hs-accordion-toggle hs-accordion-active:text-blue-600 inline-flex items-center gap-x-3 w-full font-semibold text-start text-gray-800 py-4 px-5 hover:text-gray-500 disabled:opacity-50 disabled:pointer-events-none" aria-expanded="true">
           <svg class="hs-accordion-active:hidden block size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -61,7 +61,7 @@
               </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 border-collapse">
-              {#each report[teacher.id].sort((a, b) => {
+              {#each (report[teacher.id] ?? []).sort((a, b) => {
                 // First, compare by title
                 const titleComparison = a.title.localeCompare(b.title);
 

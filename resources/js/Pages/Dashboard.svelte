@@ -28,6 +28,19 @@
   import {Eye} from "lucide-svelte";
   import {DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "$lib/components/ui/dropdown-menu/index.js";
 
+  function syncForce() {
+    router.get(route('sync'), {
+      force: true
+    }, {
+      onSuccess: function() {
+        toast.success("Sync Successful", {
+          position: 'bottom-right',
+          description: 'Data has been successfully synced'
+        });
+      }
+    })
+  }
+
   function sync() {
     router.get(route('sync'), {}, {
       onSuccess: function() {
@@ -74,8 +87,9 @@
             <Card.Description>Last Sync</Card.Description>
             <Card.Title class="text-2xl">{$page.props.lastSync}</Card.Title>
           </Card.Content>
-          <Card.Footer>
+          <Card.Footer class="gap-2">
             <button onclick="{sync}" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync</button>
+            <button onclick="{syncForce}" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync Force</button>
           </Card.Footer>
         </Card.Root>
       </div>

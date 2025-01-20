@@ -51,7 +51,7 @@ class ReportController extends Controller {
 
   public function subjectLoading()
   {
-    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->get()->toArray();
+    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->where('role', User::ROLE_TEACHER)->get()->toArray();
     $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get();
 
     return Inertia::render('Reports/SubjectLoading', [
@@ -61,8 +61,8 @@ class ReportController extends Controller {
   }
 
   public function attendanceReport() {
-    $startOfWeek = Carbon::parse('2025-W02')->startOfWeek()->subDay();
-    $endOfWeek = Carbon::parse('2025-W02')->endOfWeek();
+    $startOfWeek = Carbon::parse('2025-W05')->startOfWeek()->subDay();
+    $endOfWeek = Carbon::parse('2025-W05')->endOfWeek();
 
     $attendanceReport = DB::table('attendance_student_subject as ass')
       ->join('students', 'ass.student_no', '=', 'students.student_no')
@@ -126,6 +126,19 @@ class ReportController extends Controller {
               'last_name' => $firstRecord->last_name,
             ],
             'subjects' => $studentSubjects->map(function ($record) {
+              // Get all attendance records for this student-subject combination
+              $attendanceRecords = DB::table('attendance_student_subject as ass')
+                ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
+                ->where('ass.student_no', $record->student_no)
+                ->where('ass.subject_id', $record->subject_id)
+                ->select(
+                  'attendances.date',
+                  'ass.status',
+                  'ass.hours'
+                )
+                ->orderBy('attendances.date', 'desc')
+                ->get();
+
               return [
                 'code' => $record->subject_code,
                 'title' => $record->subject_name,
@@ -138,13 +151,13 @@ class ReportController extends Controller {
                 ],
                 'absences_this_week' => (float)$record->absences_this_week,
                 'absences_before' => (float)$record->absences_before,
-                'absences' => [
-                  [
-                    'date' => now()->toDateString(),
-                    'status' => 'present',
-                    'hours' => 0
-                  ]
-                ]
+                'absences' => $attendanceRecords->map(function($attendance) {
+                  return [
+                    'date' => $attendance->date,
+                    'status' => $attendance->status,
+                    'hours' => (float)$attendance->hours
+                  ];
+                })->values()->toArray()
               ];
             })->values()
           ]

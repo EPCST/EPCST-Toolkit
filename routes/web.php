@@ -51,10 +51,10 @@ Route::middleware('auth')->group(function(){
   Route::get('/sync', function(Request $request){
     $dbs = new \App\Services\DatabaseSyncService();
     if(auth()->user()->role === 'admin') {
-      $dbs->syncPull();
+      $dbs->syncPull($request);
     }
     else if(auth()->user()->role === 'teacher') {
-      $dbs->sync();
+      $dbs->sync($request);
     }
 
     return redirect()->back()->with([
