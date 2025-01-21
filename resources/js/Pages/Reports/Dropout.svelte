@@ -13,71 +13,38 @@
   import {toast} from "svelte-sonner";
   import {onMount} from "svelte";
 
-  const {report, range} = $props();
+  const {report, month} = $props();
 
   // On mount make sure that we initialize Preline JS.
   onMount(() => {
     window.HSStaticMethods.autoInit();
   });
 
-  function getCurrentWeek() {
-    if(range.original) {
-      return range.original;
-    }
+  function getCurrentMonth(month = null) {
+    const today = new Date(month);
+    const monthIndex = today.getMonth(); // Get month index (0-11)
+    const year = today.getFullYear();
 
-    let today = new Date();
-
-    const jan1 = new Date(today.getFullYear(), 0, 1);
-    const days = Math.floor((today - jan1) / (24 * 60 * 60 * 1000));
-    const weekNumber = Math.ceil((today.getDay() + 1 + days) / 7);
-
-    // Format the week string `YYYY-W##`
-    const weekString = today.getFullYear() + '-W' + (weekNumber < 10 ? '0' : '') + weekNumber;
-    return weekString;
+    return `${year}-${(monthIndex + 1).toString().padStart(2, '0')}`;
   }
 
-  function getCurrentWeekDateRange(date = null) {
-    // Get the current date
-    const today = new Date(date);
 
-    // Find the first day (Monday) of the current week
-    const firstDayOfWeek = new Date(today);
-    const dayOfWeek = firstDayOfWeek.getDay(); // 0 for Sunday, 1 for Monday, etc.
-    const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Calculate difference to Monday
-    firstDayOfWeek.setDate(today.getDate() + diffToMonday);
-
-    // Find the last day (Sunday) of the current week
-    const lastDayOfWeek = new Date(firstDayOfWeek);
-    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6); // Add 6 days to get Sunday
-
-    // Format as YYYY-MM-DD
-    const formatDate = (date) => date.toISOString().split('T')[0]; // Extract just the date part
-
-    const startOfWeek = formatDate(firstDayOfWeek);
-    const endOfWeek = formatDate(lastDayOfWeek);
-
-    return {
-      startOfWeek,
-      endOfWeek
-    };
-  }
-
-  let week = $state(getCurrentWeek());
-  let dates = getCurrentWeekDateRange(range.week);
+  let monthInput = $state(getCurrentMonth(month));
 
   function getReport() {
-    router.get(route('reports.attendanceReport'), {
-      week: week
+    router.get(route('reports.dropoutReport'), {
+      month: monthInput
     }, {
       onSuccess: () => {
-        toast.success("Attendance retrieved", {
+        toast.success("Dropout retrieved", {
           position: 'bottom-right',
-          description: 'Attendance summary has been retrieved successfully'
+          description: 'Dropout summary has been retrieved successfully'
         });
       }
     });
   }
 
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const {
     semester,
@@ -93,13 +60,13 @@
       <p class="text-xs">System Generated Report</p>
     </div>
     <div class="flex justify-center items-center flex-col">
-      <h1 class="text-xl text-center font-bold">Attendance Summary</h1>
+      <h1 class="text-xl text-center font-bold">Dropout Summary</h1>
       <p class="text-xs">{semester}, A.Y. {school_year}</p>
-      <p class="text-xs mt-4"><b>FROM:</b> {range.start ?? dates.startOfWeek} | <b>TO: </b> {range.end ?? dates.endOfWeek}</p>
+      <p class="text-xs mt-4">Month of <b><u>{months[month.split('-')[1] - 1]}, {month.split('-')[0]}</u></b></p>
     </div>
   </div>
   <div class="shadow p-2 mb-2 flex gap-2">
-    <input type="week" bind:value={week} class="py-2.5 px-3 w-full inline-flex items-center rounded-xl text-sm border border-gray-200 bg-white text-gray-500 ring-1 ring-transparent hover:border-purple-500 hover:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:border-purple-500 focus:ring-purple-500 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-500 dark:hover:ring-neutral-600 dark:focus:ring-neutral-600" />
+    <input type="month" bind:value={monthInput} id="month" class="py-2.5 px-3 w-full inline-flex items-center rounded-xl text-sm border border-gray-200 bg-white text-gray-500 ring-1 ring-transparent hover:border-purple-500 hover:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:border-purple-500 focus:ring-purple-500 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-500 dark:hover:ring-neutral-600 dark:focus:ring-neutral-600" />
     <button onclick="{getReport}" class="w-32 flex justify-center py-2 px-3 items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Get Summary</button>
   </div>
   <div class="-m-1.5 overflow-x-auto">
@@ -124,9 +91,9 @@
                 <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Instructor</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Subject</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Section</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Unit</th>
                 <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase"># of Hours</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Total</th>
-                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Actions</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Date of Last Attendance</th>
               </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 border-collapse">
@@ -146,8 +113,9 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.teacher.first_name} {subject.teacher.middle_name} {subject.teacher.last_name}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.title}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.section}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.absences_this_week}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.absences_this_week + subject.absences_before}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.units_lec} ({subject.units_lab})</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.total_absences}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.last_attendance_date ?? 'Never present'}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">
 
                   </td>

@@ -260,13 +260,16 @@ class ReportController extends Controller {
 
   public function dropoutReport(Request $request)
   {
+    $month = Carbon::parse($request->get('month') ?? Carbon::now());
+
     // Get start and end dates from request or default to current month
-    $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
-    $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+    $startDate = Carbon::parse($month)->startOfMonth();
+    $endDate = Carbon::parse($month)->endOfMonth();
 
     $droppedStudents = DB::table('student_subject as ss')
-      ->join('students', 'ss.student_id', '=', 'students.id')
+      ->join('students', 'ss.student_no', '=', 'students.student_no')
       ->join('subjects', 'ss.subject_id', '=', 'subjects.id')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
       ->where('ss.status', '=', 'dropped')
       ->where('ss.academic_year_id', Settings::get('academic_year'))
       ->whereBetween('ss.dropped_at', [$startDate, $endDate])
@@ -274,17 +277,22 @@ class ReportController extends Controller {
         'subjects.id as subject_id',
         'subjects.title as subject_name',
         'subjects.code as subject_code',
+        'subjects.units_lab as units_lab',
+        'subjects.units_lec as units_lec',
         'subjects.section',
-        'students.id as student_id',
         'students.student_no',
         'students.first_name',
         'students.last_name',
+        'users.first_name as teacher_first_name',
+        'users.middle_name as teacher_middle_name',
+        'users.last_name as teacher_last_name',
+        'users.department as teacher_department',
         'ss.dropped_at',
         DB::raw('(
                 SELECT COALESCE(SUM(ass.hours), 0)
                 FROM attendance_student_subject ass
                 JOIN attendances a ON ass.attendance_id = a.id
-                WHERE ass.student_id = students.id
+                WHERE ass.student_no = students.student_no
                 AND ass.subject_id = subjects.id
                 AND a.academic_year_id = ss.academic_year_id
             ) as total_absences'),
@@ -292,35 +300,71 @@ class ReportController extends Controller {
                 SELECT MAX(a.date)
                 FROM attendance_student_subject ass
                 JOIN attendances a ON ass.attendance_id = a.id
-                WHERE ass.student_id = students.id
+                WHERE ass.student_no = students.student_no
                 AND ass.subject_id = subjects.id
                 AND a.academic_year_id = ss.academic_year_id
                 AND ass.status = "present"
             ) as last_attendance_date')
       )
-      ->orderBy('subjects.title')
       ->orderBy('students.last_name')
+      ->orderBy('subjects.title')
       ->get()
-      ->groupBy('subject_id')
-      ->map(function ($studentsInSubject) {
-        $firstRecord = $studentsInSubject->first();
+      ->groupBy('student_no')
+      ->mapWithKeys(function ($studentSubjects) {
+        $firstRecord = $studentSubjects->first();
         return [
-          'subject_name' => $firstRecord->subject_name,
-          'subject_code' => $firstRecord->subject_code,
-          'section' => $firstRecord->section,
-          'students' => $studentsInSubject->map(function ($record) {
-            return [
-              'id' => $record->student_id,
-              'student_no' => $record->student_no,
-              'first_name' => $record->first_name,
-              'last_name' => $record->last_name,
-              'dropped_at' => Carbon::parse($record->dropped_at)->format('M d, Y'),
-              'total_absences' => (float)$record->total_absences,
-              'last_attendance_date' => $record->last_attendance_date
-            ];
-          })->values()
+          $firstRecord->student_no => [
+            'student' => [
+              'first_name' => $firstRecord->first_name,
+              'last_name' => $firstRecord->last_name,
+            ],
+            'subjects' => $studentSubjects->map(function ($record) {
+              // Get all attendance records for this student-subject combination
+              $attendanceRecords = DB::table('attendance_student_subject as ass')
+                ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
+                ->where('ass.student_no', $record->student_no)
+                ->where('ass.subject_id', $record->subject_id)
+                ->where('attendances.academic_year_id', Settings::get('academic_year'))
+                ->select(
+                  'attendances.date',
+                  'ass.status',
+                  'ass.hours'
+                )
+                ->orderBy('attendances.date', 'desc')
+                ->get();
+
+              return [
+                'code' => $record->subject_code,
+                'units_lab' => $record->units_lab,
+                'units_lec' => $record->units_lec,
+                'title' => $record->subject_name,
+                'section' => $record->section,
+                'teacher' => [
+                  'first_name' => $record->teacher_first_name,
+                  'middle_name' => $record->teacher_middle_name,
+                  'last_name' => $record->teacher_last_name,
+                  'department' => $record->teacher_department
+                ],
+                'dropped_at' => Carbon::parse($record->dropped_at)->format('M d, Y'),
+                'total_absences' => (float)$record->total_absences,
+                'last_attendance_date' => $record->last_attendance_date,
+                'attendances' => $attendanceRecords->map(function($attendance) {
+                  return [
+                    'date' => $attendance->date,
+                    'status' => $attendance->status,
+                    'hours' => (float)$attendance->hours
+                  ];
+                })->values()->toArray()
+              ];
+            })->values()
+          ]
         ];
-      })->values();
+      });
+
+    return Inertia::render('Reports/Dropout', [
+      'report' => $droppedStudents,
+      'month' => Carbon::parse($month)->format('Y-m'),
+    ]);
   }
 
   public function gradeReport(Request $request)
