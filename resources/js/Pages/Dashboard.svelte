@@ -89,7 +89,7 @@
           </Card.Content>
           <Card.Footer class="gap-2">
             <button onclick="{sync}" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync</button>
-            <button onclick="{syncForce}" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync Force</button>
+            <button onclick="{syncForce}" class="py-1 rounded-md hover:bg-red-700 px-4 border-red-200 border text-sm bg-red-500 text-white">Sync Force</button>
           </Card.Footer>
         </Card.Root>
       </div>

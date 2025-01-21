@@ -34,7 +34,7 @@ class AuthController extends Controller {
         if(Auth::attempt($formFields)) {
           if(auth()->user()->role === 'admin') {
             $dbs = new DatabaseSyncService();
-            $dbs->syncPull();
+            $dbs->syncPull($request);
           }
 
           return redirect()->route('dashboard');

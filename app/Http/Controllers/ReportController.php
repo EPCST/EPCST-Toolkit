@@ -60,9 +60,9 @@ class ReportController extends Controller {
     ]);
   }
 
-  public function attendanceReport() {
-    $startOfWeek = Carbon::parse('2025-W05')->startOfWeek()->subDay();
-    $endOfWeek = Carbon::parse('2025-W05')->endOfWeek();
+  public function attendanceReport(Request $request) {
+    $startOfWeek = Carbon::parse($request->get('week', Carbon::now()))->startOfWeek()->subDay();
+    $endOfWeek = Carbon::parse($request->get('week', Carbon::now()))->endOfWeek();
 
     $attendanceReport = DB::table('attendance_student_subject as ass')
       ->join('students', 'ass.student_no', '=', 'students.student_no')
@@ -83,6 +83,8 @@ class ReportController extends Controller {
         'subjects.title as subject_name',
         'subjects.code as subject_code',
         'subjects.section',
+        'subjects.attendance_threshold as attendance_threshold',
+        'subjects.dropout_threshold as dropout_threshold',
         DB::raw('SUM(ass.hours) as total_hours'),
         // Separate subquery for current week
         DB::raw("(
@@ -125,7 +127,12 @@ class ReportController extends Controller {
               'first_name' => $firstRecord->first_name,
               'last_name' => $firstRecord->last_name,
             ],
-            'subjects' => $studentSubjects->map(function ($record) {
+            'subjects' => $studentSubjects->map(function ($record) use ($firstRecord) {
+              // Skip if condition not met
+              if(!(($record->absences_before >= $firstRecord->attendance_threshold && $record->absences_this_week > 0) || ($record->absences_before + $record->absences_this_week >= $firstRecord->attendance_threshold && $record->absences_before < $firstRecord->attendance_threshold))) {
+                return null;
+              }
+
               // Get all attendance records for this student-subject combination
               $attendanceRecords = DB::table('attendance_student_subject as ass')
                 ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
@@ -159,12 +166,22 @@ class ReportController extends Controller {
                   ];
                 })->values()->toArray()
               ];
-            })->values()
+            })->filter()->values() // Filter out null values and reindex array
           ]
         ];
+      })
+      ->filter(function ($student) {
+        return count($student['subjects']) > 0;
       });
 
-    dd($attendanceReport);
+    return Inertia::render('Reports/Attendance', [
+      'report' => $attendanceReport,
+      'range' => [
+        'start' => Carbon::parse($startOfWeek)->addDay()->format('M d, Y'),
+        'end' => Carbon::parse($endOfWeek)->format('M d, Y'),
+        'original' => $request->get('week')
+      ]
+    ]);
   }
 
 
