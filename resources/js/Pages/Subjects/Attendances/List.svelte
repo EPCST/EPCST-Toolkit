@@ -8,10 +8,10 @@
   import {ChevronLeft, EllipsisVertical, Eye, FileMinus, Pencil, StickyNote, Undo2} from "lucide-svelte";
 
   const {subject,attendances} = $props();
-
   onMount(() => {
     window.HSStaticMethods.autoInit();
   });
+
 </script>
 <div class="flex flex-col sm:pl-14">
   <div class="bg-blue-500 text-white px-1/2 p-8 flex items-center justify-between">
@@ -32,7 +32,15 @@
         <thead class="bg-gray-300">
         <tr id="attendanceDates">
           <th class="p-2 border border-gray-400 sticky top-0 left-0 bg-gray-300 z-20">&ZeroWidthSpace;</th>
-          {#each attendances as attendance}
+          {#each attendances.sort((a, b) => {
+            const dateCompare = a.date.localeCompare(b.date);
+            if(dateCompare === 0) {
+              // Secondary comparison by another attribute, for example, date
+              return new Date(a.created_at) - new Date(b.created_at);
+            }
+
+            return dateCompare;
+          }) as attendance}
           <th class="p-2 border border-gray-400 min-w-[150px] text-center hover:bg-gray-400 cursor-pointer">
             <Link href="{route('subjects.attendances.edit', {subject: subject.id, attendance: attendance.id})}">
               <div class="flex items-center justify-center gap-4">{attendance.date} <Pencil size="14" />
@@ -55,7 +63,15 @@
             <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold && student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
               <b>{student.last_name}</b>, {student.first_name}
             </td>
-            {#each student.attendances.sort((a, b) => a.date.localeCompare(b.date)) as attendance}
+            {#each student.attendances.sort((a, b) => {
+              const dateCompare = a.date.localeCompare(b.date);
+              if(dateCompare === 0) {
+                // Secondary comparison by another attribute, for example, date
+                return new Date(a.created_at) - new Date(b.created_at);
+              }
+
+              return dateCompare;
+            }) as attendance}
             <td class="p-2 border border-gray-400 {student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-50'}">
               <div class="flex justify-between items-center hs-tooltip">
                 <p>{attendance.pivot.hours}</p>
