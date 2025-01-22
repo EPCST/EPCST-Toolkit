@@ -27,17 +27,15 @@ class AttendanceStudent extends Pivot {
       ->select(
         'ss.returned_at',
         'ss.status',
-        'attendances.date',
         'students.first_name',
         'students.student_no',
         'students.last_name',
         'subjects.title',
-        'ass.hours',
         DB::raw('SUM(ass.return_to_class) as hasRTC'),
         DB::raw('SUM(ass.hours) as absences'),
         DB::raw('SUM(CASE WHEN attendances.date > DATE(ss.returned_at) OR ss.returned_at IS NULL THEN ass.hours ELSE 0 END) as absences_after_return')
       )
-      ->groupBy('ass.student_no', 'ass.subject_id', 'students.first_name', 'subjects.title', 'ss.returned_at', 'ss.status', 'attendances.date', 'students.last_name')
+      ->groupBy('ass.student_no', 'ss.returned_at', 'ss.status', 'students.first_name', 'students.last_name', 'subjects.title')
       ->get();
 
     $returnList = $results->filter(function($a) {
@@ -50,7 +48,7 @@ class AttendanceStudent extends Pivot {
 
     StudentSubject::whereIn('student_no', $droppedList->pluck('student_no'))
       ->where('subject_id', $subject->id)
-      ->update(['status' => 'dropped']);
+      ->update(['status' => 'dropped', 'dropped_at' => Carbon::now()]);
 
     StudentSubject::whereNotIn('student_no', $droppedList->pluck('student_no'))
       ->where('subject_id', $subject->id)

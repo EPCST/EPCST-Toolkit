@@ -28,6 +28,19 @@
   import {Eye} from "lucide-svelte";
   import {DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "$lib/components/ui/dropdown-menu/index.js";
 
+  function syncForce() {
+    router.get(route('sync'), {
+      force: true
+    }, {
+      onSuccess: function() {
+        toast.success("Sync Successful", {
+          position: 'bottom-right',
+          description: 'Data has been successfully synced'
+        });
+      }
+    })
+  }
+
   function sync() {
     router.get(route('sync'), {}, {
       onSuccess: function() {
@@ -74,8 +87,9 @@
             <Card.Description>Last Sync</Card.Description>
             <Card.Title class="text-2xl">{$page.props.lastSync}</Card.Title>
           </Card.Content>
-          <Card.Footer>
+          <Card.Footer class="gap-2">
             <button onclick="{sync}" class="py-1 rounded-md hover:bg-gray-100 px-4 border-gray-200 border text-sm">Sync</button>
+            <button onclick="{syncForce}" class="py-1 rounded-md hover:bg-red-700 px-4 border-red-200 border text-sm bg-red-500 text-white">Sync Force</button>
           </Card.Footer>
         </Card.Root>
       </div>
@@ -123,9 +137,9 @@
                   <Badge>Weekly</Badge>
                 </Table.Cell>
                 <Table.Cell class="text-right flex justify-end items-center gap-2">
-                  <Button variant="outline" size="icon" class="bg-blue-600 hover:bg-blue-700 text-white hover:text-white">
+                  <Link class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{route('reports.attendanceReport')}" variant="outline" size="icon">
                     <Eye size={16} class="w-auto"/>
-                  </Button>
+                  </Link>
                 </Table.Cell>
               </Table.Row>
               <Table.Row>
@@ -134,9 +148,9 @@
                   <Badge>Monthly</Badge>
                 </Table.Cell>
                 <Table.Cell class="text-right flex justify-end items-center gap-2">
-                  <Button variant="outline" size="icon" class="bg-blue-600 hover:bg-blue-700 text-white hover:text-white">
+                  <Link class="hs-tooltip-toggle flex shrink-0 justify-center items-center gap-2 size-[38px] text-sm font-medium rounded-lg border border-transparent bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none" href="{route('reports.dropoutReport')}" variant="outline" size="icon">
                     <Eye size={16} class="w-auto"/>
-                  </Button>
+                  </Link>
                 </Table.Cell>
               </Table.Row>
               <Table.Row>

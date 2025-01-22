@@ -51,8 +51,8 @@ class ReportController extends Controller {
 
   public function subjectLoading()
   {
-    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->get()->toArray();
-    $subjects = Subject::all();
+    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->where('role', User::ROLE_TEACHER)->get()->toArray();
+    $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get();
 
     return Inertia::render('Reports/SubjectLoading', [
       'report' => $subjects->groupBy('user_id'),
@@ -60,30 +60,38 @@ class ReportController extends Controller {
     ]);
   }
 
-  public function attendanceReport() {
-    $startOfWeek = Carbon::parse('2025-W02')->startOfWeek()->subDay();
-    $endOfWeek = Carbon::parse('2025-W02')->endOfWeek();
+  public function attendanceReport(Request $request) {
+    $startOfWeek = Carbon::parse($request->get('week', Carbon::now()))->startOfWeek()->subDay();
+    $endOfWeek = Carbon::parse($request->get('week', Carbon::now()))->endOfWeek();
 
     $attendanceReport = DB::table('attendance_student_subject as ass')
-      ->join('students', 'ass.student_id', '=', 'students.id')
+      ->join('students', 'ass.student_no', '=', 'students.student_no')
       ->join('subjects', 'ass.subject_id', '=', 'subjects.id')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
       ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
       ->where('attendances.academic_year_id', Settings::get('academic_year'))
       ->select(
-        'students.id as student_id',
+        'users.id as teacher_id',
+        'users.first_name as teacher_first_name',
+        'users.middle_name as teacher_middle_name',
+        'users.last_name as teacher_last_name',
+        'users.department as teacher_department',
+        'students.student_no as student_no',
         'students.first_name',
         'students.last_name',
         'subjects.id as subject_id',
         'subjects.title as subject_name',
         'subjects.code as subject_code',
         'subjects.section',
+        'subjects.attendance_threshold as attendance_threshold',
+        'subjects.dropout_threshold as dropout_threshold',
         DB::raw('SUM(ass.hours) as total_hours'),
         // Separate subquery for current week
         DB::raw("(
             SELECT COALESCE(SUM(ass2.hours), 0)
             FROM attendance_student_subject ass2
             JOIN attendances a2 ON ass2.attendance_id = a2.id
-            WHERE ass2.student_id = students.id
+            WHERE ass2.student_no = students.student_no
             AND ass2.subject_id = subjects.id
             AND DATE(a2.date) BETWEEN '{$startOfWeek}' AND '{$endOfWeek}'
         ) as absences_this_week"),
@@ -92,13 +100,14 @@ class ReportController extends Controller {
             SELECT COALESCE(SUM(ass2.hours), 0)
             FROM attendance_student_subject ass2
             JOIN attendances a2 ON ass2.attendance_id = a2.id
-            WHERE ass2.student_id = students.id
+            WHERE ass2.student_no = students.student_no
             AND ass2.subject_id = subjects.id
             AND DATE(a2.date) < '{$startOfWeek}'
         ) as absences_before")
       )
       ->groupBy(
-        'students.id',
+        'users.id',
+        'students.student_no',
         'students.first_name',
         'students.last_name',
         'subjects.id',
@@ -106,28 +115,73 @@ class ReportController extends Controller {
         'subjects.code',
         'subjects.section'
       )
-      ->orderBy('subjects.title')
       ->orderBy('students.last_name')
+      ->orderBy('subjects.title')
       ->get()
-      ->groupBy('subject_id')
-      ->map(function ($studentsInSubject) {
+      ->groupBy('student_no')
+      ->mapWithKeys(function ($studentSubjects) {
+        $firstRecord = $studentSubjects->first();
         return [
-          'subject_name' => $studentsInSubject->first()->subject_name,
-          'subject_code' => $studentsInSubject->first()->subject_code,
-          'section' => $studentsInSubject->first()->section,
-          'students' => $studentsInSubject->map(function ($record) {
-            return [
-              'id' => $record->student_id,
-              'first_name' => $record->first_name,
-              'last_name' => $record->last_name,
-              'absences_this_week' => (float)$record->absences_this_week,
-              'absences_before' => (float)$record->absences_before,
-            ];
-          })->values()
-        ];
-      })->values();
+          $firstRecord->student_no => [
+            'student' => [
+              'first_name' => $firstRecord->first_name,
+              'last_name' => $firstRecord->last_name,
+            ],
+            'subjects' => $studentSubjects->map(function ($record) use ($firstRecord) {
+              // Skip if condition not met
+              if(!(($record->absences_before >= $firstRecord->attendance_threshold && $record->absences_this_week > 0) || ($record->absences_before + $record->absences_this_week >= $firstRecord->attendance_threshold && $record->absences_before < $firstRecord->attendance_threshold))) {
+                return null;
+              }
 
-    dd($attendanceReport);
+              // Get all attendance records for this student-subject combination
+              $attendanceRecords = DB::table('attendance_student_subject as ass')
+                ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
+                ->where('ass.student_no', $record->student_no)
+                ->where('ass.subject_id', $record->subject_id)
+                ->select(
+                  'attendances.date',
+                  'ass.status',
+                  'ass.hours'
+                )
+                ->orderBy('attendances.date', 'desc')
+                ->get();
+
+              return [
+                'code' => $record->subject_code,
+                'title' => $record->subject_name,
+                'section' => $record->section,
+                'teacher' => [
+                  'first_name' => $record->teacher_first_name,
+                  'middle_name' => $record->teacher_middle_name,
+                  'last_name' => $record->teacher_last_name,
+                  'department' => $record->teacher_department
+                ],
+                'absences_this_week' => (float)$record->absences_this_week,
+                'absences_before' => (float)$record->absences_before,
+                'absences' => $attendanceRecords->map(function($attendance) {
+                  return [
+                    'date' => $attendance->date,
+                    'status' => $attendance->status,
+                    'hours' => (float)$attendance->hours
+                  ];
+                })->values()->toArray()
+              ];
+            })->filter()->values() // Filter out null values and reindex array
+          ]
+        ];
+      })
+      ->filter(function ($student) {
+        return count($student['subjects']) > 0;
+      });
+
+    return Inertia::render('Reports/Attendance', [
+      'report' => $attendanceReport,
+      'range' => [
+        'start' => Carbon::parse($startOfWeek)->addDay()->format('M d, Y'),
+        'end' => Carbon::parse($endOfWeek)->format('M d, Y'),
+        'original' => $request->get('week')
+      ]
+    ]);
   }
 
 
@@ -206,13 +260,16 @@ class ReportController extends Controller {
 
   public function dropoutReport(Request $request)
   {
+    $month = Carbon::parse($request->get('month') ?? Carbon::now());
+
     // Get start and end dates from request or default to current month
-    $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
-    $endDate = $request->get('end_date', Carbon::now()->endOfMonth());
+    $startDate = Carbon::parse($month)->startOfMonth();
+    $endDate = Carbon::parse($month)->endOfMonth();
 
     $droppedStudents = DB::table('student_subject as ss')
-      ->join('students', 'ss.student_id', '=', 'students.id')
+      ->join('students', 'ss.student_no', '=', 'students.student_no')
       ->join('subjects', 'ss.subject_id', '=', 'subjects.id')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
       ->where('ss.status', '=', 'dropped')
       ->where('ss.academic_year_id', Settings::get('academic_year'))
       ->whereBetween('ss.dropped_at', [$startDate, $endDate])
@@ -220,17 +277,22 @@ class ReportController extends Controller {
         'subjects.id as subject_id',
         'subjects.title as subject_name',
         'subjects.code as subject_code',
+        'subjects.units_lab as units_lab',
+        'subjects.units_lec as units_lec',
         'subjects.section',
-        'students.id as student_id',
         'students.student_no',
         'students.first_name',
         'students.last_name',
+        'users.first_name as teacher_first_name',
+        'users.middle_name as teacher_middle_name',
+        'users.last_name as teacher_last_name',
+        'users.department as teacher_department',
         'ss.dropped_at',
         DB::raw('(
                 SELECT COALESCE(SUM(ass.hours), 0)
                 FROM attendance_student_subject ass
                 JOIN attendances a ON ass.attendance_id = a.id
-                WHERE ass.student_id = students.id
+                WHERE ass.student_no = students.student_no
                 AND ass.subject_id = subjects.id
                 AND a.academic_year_id = ss.academic_year_id
             ) as total_absences'),
@@ -238,35 +300,71 @@ class ReportController extends Controller {
                 SELECT MAX(a.date)
                 FROM attendance_student_subject ass
                 JOIN attendances a ON ass.attendance_id = a.id
-                WHERE ass.student_id = students.id
+                WHERE ass.student_no = students.student_no
                 AND ass.subject_id = subjects.id
                 AND a.academic_year_id = ss.academic_year_id
                 AND ass.status = "present"
             ) as last_attendance_date')
       )
-      ->orderBy('subjects.title')
       ->orderBy('students.last_name')
+      ->orderBy('subjects.title')
       ->get()
-      ->groupBy('subject_id')
-      ->map(function ($studentsInSubject) {
-        $firstRecord = $studentsInSubject->first();
+      ->groupBy('student_no')
+      ->mapWithKeys(function ($studentSubjects) {
+        $firstRecord = $studentSubjects->first();
         return [
-          'subject_name' => $firstRecord->subject_name,
-          'subject_code' => $firstRecord->subject_code,
-          'section' => $firstRecord->section,
-          'students' => $studentsInSubject->map(function ($record) {
-            return [
-              'id' => $record->student_id,
-              'student_no' => $record->student_no,
-              'first_name' => $record->first_name,
-              'last_name' => $record->last_name,
-              'dropped_at' => Carbon::parse($record->dropped_at)->format('M d, Y'),
-              'total_absences' => (float)$record->total_absences,
-              'last_attendance_date' => $record->last_attendance_date
-            ];
-          })->values()
+          $firstRecord->student_no => [
+            'student' => [
+              'first_name' => $firstRecord->first_name,
+              'last_name' => $firstRecord->last_name,
+            ],
+            'subjects' => $studentSubjects->map(function ($record) {
+              // Get all attendance records for this student-subject combination
+              $attendanceRecords = DB::table('attendance_student_subject as ass')
+                ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
+                ->where('ass.student_no', $record->student_no)
+                ->where('ass.subject_id', $record->subject_id)
+                ->where('attendances.academic_year_id', Settings::get('academic_year'))
+                ->select(
+                  'attendances.date',
+                  'ass.status',
+                  'ass.hours'
+                )
+                ->orderBy('attendances.date', 'desc')
+                ->get();
+
+              return [
+                'code' => $record->subject_code,
+                'units_lab' => $record->units_lab,
+                'units_lec' => $record->units_lec,
+                'title' => $record->subject_name,
+                'section' => $record->section,
+                'teacher' => [
+                  'first_name' => $record->teacher_first_name,
+                  'middle_name' => $record->teacher_middle_name,
+                  'last_name' => $record->teacher_last_name,
+                  'department' => $record->teacher_department
+                ],
+                'dropped_at' => Carbon::parse($record->dropped_at)->format('M d, Y'),
+                'total_absences' => (float)$record->total_absences,
+                'last_attendance_date' => $record->last_attendance_date,
+                'attendances' => $attendanceRecords->map(function($attendance) {
+                  return [
+                    'date' => $attendance->date,
+                    'status' => $attendance->status,
+                    'hours' => (float)$attendance->hours
+                  ];
+                })->values()->toArray()
+              ];
+            })->values()
+          ]
         ];
-      })->values();
+      });
+
+    return Inertia::render('Reports/Dropout', [
+      'report' => $droppedStudents,
+      'month' => Carbon::parse($month)->format('Y-m'),
+    ]);
   }
 
   public function gradeReport(Request $request)
