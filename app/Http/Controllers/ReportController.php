@@ -254,7 +254,7 @@ class ReportController extends Controller {
       ->orderBy('subjects.title')
       ->get()
       ->groupBy('student_no')
-      ->mapWithKeys(function ($studentActivities) use ($attendanceData, $periodsToInclude) {
+      ->mapWithKeys(function ($studentActivities) use ($attendanceData, $periodsToInclude, $period) {
         $firstRecord = $studentActivities->first();
 
         return [
@@ -265,7 +265,7 @@ class ReportController extends Controller {
             ],
             'subjects' => $studentActivities
               ->groupBy('subject_id')
-              ->map(function ($subjectActivities) use ($firstRecord, $attendanceData, $periodsToInclude) {
+              ->map(function ($subjectActivities) use ($firstRecord, $attendanceData, $periodsToInclude, $period) {
                 $firstSubjectRecord = $subjectActivities->first();
                 $studentAttendance = $attendanceData[$firstRecord->student_no][$firstSubjectRecord->subject_id] ?? [];
 
@@ -313,6 +313,17 @@ class ReportController extends Controller {
                   $finalGrade += $periodGrade * (self::PERIOD_WEIGHTS[$currentPeriod] / 100);
                 }
 
+                if($firstRecord->last_name === 'Espulgar') {
+                  if($periodGrades[$period]['raw'] >= 74.5) {
+                    return null;
+                  }
+                }
+
+                // Skip if condition not met
+                if($periodGrades[$period]['raw'] >= 74.5) {
+                  return null;
+                }
+
                 return [
                   'code' => $firstSubjectRecord->subject_code,
                   'title' => $firstSubjectRecord->subject_name,
@@ -344,10 +355,14 @@ class ReportController extends Controller {
                     ]
                   ]
                 ];
+              })->filter(function ($subject) {
+                return !is_null($subject);
               })->values()
           ]
         ];
-      });
+      })->filter(function ($student) {
+        return count($student['subjects']) > 0;
+      });;
 
     return Inertia::render('Reports/Academic', [
       'report' => $academicReport,

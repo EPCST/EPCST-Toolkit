@@ -28,6 +28,8 @@ return new class extends Migration {
       $table->date('returned_at')->nullable();
       $table->timestamp('deleted_at')->nullable();
       $table->timestamps();
+
+      $table->unique(['student_no', 'subject_id', 'academic_year_id', 'section_id'], 'student_subject_unique');
     });
   }
 

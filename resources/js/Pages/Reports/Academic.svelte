@@ -25,14 +25,15 @@
       week: week
     }, {
       onSuccess: () => {
-        toast.success("Attendance retrieved", {
+        toast.success("Academic retrieved", {
           position: 'bottom-right',
-          description: 'Attendance summary has been retrieved successfully'
+          description: 'Academic summary has been retrieved successfully'
         });
       }
     });
   }
 
+  let period = $state($page.props.app.settings.period);
 
   const {
     semester,
@@ -50,16 +51,71 @@
     <div class="flex justify-center items-center flex-col">
       <h1 class="text-xl text-center font-bold">Academic Summary</h1>
       <p class="text-xs">{semester}, A.Y. {school_year}</p>
-      <p class="text-xs mt-4">{$page.props.app.settings.period}</p>
+      <p class="text-xs mt-4">For the period of <b><u>{period.toUpperCase()}</u></b></p>
     </div>
   </div>
   <div class="shadow p-2 mb-2 flex gap-2">
-    <input type="week" class="py-2.5 px-3 w-full inline-flex items-center rounded-xl text-sm border border-gray-200 bg-white text-gray-500 ring-1 ring-transparent hover:border-purple-500 hover:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:border-purple-500 focus:ring-purple-500 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-500 dark:hover:ring-neutral-600 dark:focus:ring-neutral-600" />
+    <select bind:value={period} class="py-2.5 px-3 w-full inline-flex items-center rounded-xl text-sm border border-gray-200 bg-white text-gray-500 ring-1 ring-transparent hover:border-purple-500 hover:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:border-purple-500 focus:ring-purple-500 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-500 dark:hover:ring-neutral-600 dark:focus:ring-neutral-600">
+      <option value="prelim">PRELIM</option>
+      <option value="midterm">MIDTERM</option>
+      <option value="final">FINAL</option>
+    </select>
     <button onclick="{getReport}" class="w-32 flex justify-center py-2 px-3 items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Get Summary</button>
   </div>
   <div class="-m-1.5 overflow-x-auto">
     <div class="p-1.5 min-w-full inline-block align-middle">
+      {#each Object.entries(report) as [key, value], i}
+        {@const { student, subjects } = value}
+        <div class="hs-accordion bg-white border -mt-px">
+          <button class="hs-accordion-toggle hs-accordion-active:text-blue-600 inline-flex items-center gap-x-3 w-full font-semibold text-start text-gray-800 py-4 px-5 hover:text-gray-500 disabled:opacity-50 disabled:pointer-events-none" aria-expanded="true">
+            <svg class="hs-accordion-active:hidden block size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
+            </svg>
+            <svg class="hs-accordion-active:block hidden size-3.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"></path>
+            </svg>
+            {student.last_name}, {student.first_name} {student.middle_name}
+          </button>
+          <div class="hs-accordion-content hidden w-full overflow-hidden transition-[height] duration-300" role="region">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Instructor</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Subject</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Section</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Grade</th>
+                <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Actions</th>
+              </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 border-collapse">
+              {#each (subjects ?? []).sort((a, b) => {
+                // First, compare by title
+                const titleComparison = a.title.localeCompare(b.title);
 
+                // If titles are not equal, return the comparison result
+                if (titleComparison !== 0) {
+                  return titleComparison;
+                }
+
+                // If titles are equal, compare by first_name
+                return a.section.localeCompare(b.section);
+              }) as subject, i}
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.teacher.first_name} {subject.teacher.middle_name} {subject.teacher.last_name}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.title}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.section}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.grades.periods[period].raw.toFixed(2)}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">
+
+                  </td>
+                </tr>
+              {/each}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {/each}
     </div>
   </div>
 </div>
