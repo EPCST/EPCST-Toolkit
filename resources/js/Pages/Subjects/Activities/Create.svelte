@@ -44,9 +44,7 @@
           position: 'bottom-right'
         });
 
-        if(!['prelim', 'midterm', 'final'].includes(type)) {
-          router.get(route('subjects.activities.index', {subject: subject.id}), {}, {replace: true})
-        }
+        router.get(route(!['prelim', 'midterm', 'final'].includes(type) ? 'subjects.activities.index' : 'subjects.show', {subject: subject.id}), {}, {replace: true})
       }
     });
   }
