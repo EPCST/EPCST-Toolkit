@@ -313,12 +313,6 @@ class ReportController extends Controller {
                   $finalGrade += $periodGrade * (self::PERIOD_WEIGHTS[$currentPeriod] / 100);
                 }
 
-                if($firstRecord->last_name === 'Espulgar') {
-                  if($periodGrades[$period]['raw'] >= 74.5) {
-                    return null;
-                  }
-                }
-
                 // Skip if condition not met
                 if($periodGrades[$period]['raw'] >= 74.5) {
                   return null;
@@ -362,7 +356,7 @@ class ReportController extends Controller {
         ];
       })->filter(function ($student) {
         return count($student['subjects']) > 0;
-      });;
+      });
 
     return Inertia::render('Reports/Academic', [
       'report' => $academicReport,
@@ -481,163 +475,180 @@ class ReportController extends Controller {
 
   public function gradeReport(Request $request)
   {
-    $academicYearId = Settings::get('academic_year');
-    $currentPeriod = $request->get('period', 'final');
-    $periods = ['prelim', 'midterm', 'final'];
+    $period = $request->get('period', 'prelim');
 
-    // Get all subjects with their students
-    $subjects = Subject::with('students')
-      ->whereHas('students')
-      ->where('academic_year_id', $academicYearId)
-      ->get();
+    // Define which periods to include based on current period
+    $periodsToInclude = match ($period) {
+      'prelim' => ['prelim'],
+      'midterm' => ['prelim', 'midterm'],
+      'final' => ['prelim', 'midterm', 'final'],
+      default => throw new \Exception('Invalid period specified')
+    };
 
-    // Initialize the structure
-    $gradeData = [];
-
-    foreach ($subjects as $subject) {
-      foreach ($subject->students as $student) {
-        if (!isset($gradeData[$subject->id])) {
-          $gradeData[$subject->id] = [
-            'subject' => $subject,
-            'students' => []
-          ];
-        }
-
-        $gradeData[$subject->id]['students'][$student->id] = [
-          'student' => $student,
-          'prelim' => $this->initializePeriodStructure(),
-          'midterm' => $this->initializePeriodStructure(),
-          'final' => $this->initializePeriodStructure()
-        ];
-      }
-    }
-
-    // Get attendance data
-    $attendances = DB::table('attendance_student_subject as ass')
+    // First get attendance data
+    $attendanceData = DB::table('attendance_student_subject as ass')
       ->join('attendances', 'ass.attendance_id', '=', 'attendances.id')
-      ->where('attendances.academic_year_id', $academicYearId)
+      ->where('attendances.academic_year_id', Settings::get('academic_year'))
+      ->whereIn('attendances.period', $periodsToInclude)
       ->select(
+        'ass.student_no',
         'ass.subject_id',
-        'ass.student_id',
         'attendances.period',
         'ass.status',
         DB::raw('SUM(ass.hours) as total_hours'),
         DB::raw('COUNT(*) as total_meetings')
       )
-      ->groupBy('ass.subject_id', 'ass.student_id', 'attendances.period', 'ass.status')
-      ->get();
+      ->groupBy('ass.student_no', 'ass.subject_id', 'attendances.period', 'ass.status')
+      ->get()
+      ->groupBy('student_no')
+      ->map(function($records) {
+        return $records->groupBy('subject_id')->map(function($subjectRecords) {
+          return $subjectRecords->groupBy('period')->map(function($periodRecords) {
+            return [
+              'absences' => $periodRecords->where('status', 'absent')->sum('total_hours'),
+              'totalMeet' => $periodRecords->sum('total_hours')
+            ];
+          });
+        });
+      });
 
-    // Get activities data (including quizzes and exams)
-    $activities = DB::table('activities')
-      ->join('activity_student', 'activities.id', '=', 'activity_student.activity_id')
-      ->where('activities.academic_year_id', $academicYearId)
+    $academicReport = DB::table('activities')
+      ->join('subjects', 'activities.subject_id', '=', 'subjects.id')
+      ->leftJoin('activity_student', 'activities.id', '=', 'activity_student.activity_id')
+      ->leftJoin('students', 'activity_student.student_no', '=', 'students.student_no')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
+      ->where('activities.academic_year_id', Settings::get('academic_year'))
+      ->whereIn('activities.period', $periodsToInclude)
       ->select(
-        'activities.subject_id',
-        'activity_student.student_id',
-        'activities.period',
+        'subjects.id as subject_id',
+        'subjects.title as subject_name',
+        'subjects.code as subject_code',
+        'subjects.section',
+        'activities.id as activity_id',
+        'activities.title as activity_title',
         'activities.type',
-        DB::raw('SUM(activity_student.score) as total_score'),
-        DB::raw('SUM(activities.points) as total_possible'),
-        DB::raw('COUNT(*) as activity_count')
+        'activities.period',
+        'activities.points',
+        'students.student_no',
+        'students.first_name',
+        'students.last_name',
+        'users.first_name as teacher_first_name',
+        'users.middle_name as teacher_middle_name',
+        'users.last_name as teacher_last_name',
+        'users.department as teacher_department',
+        'activity_student.score'
       )
-      ->groupBy('activities.subject_id', 'activity_student.student_id', 'activities.period', 'activities.type')
-      ->get();
+      ->orderBy('students.last_name')
+      ->orderBy('subjects.title')
+      ->get()
+      ->groupBy('student_no')
+      ->mapWithKeys(function ($studentActivities) use ($attendanceData, $periodsToInclude, $period) {
+        $firstRecord = $studentActivities->first();
 
-    // Populate attendance data
-    foreach ($attendances as $attendance) {
-      if(isset($gradeData[$attendance->subject_id]['students'][$attendance->student_id])) {
-        $periodData = &$gradeData[$attendance->subject_id]['students'][$attendance->student_id][$attendance->period]['attendances'];
-        if($attendance->status === 'absent') {
-          $periodData['absences'] = $attendance->total_hours;
-        }
-        $periodData['totalMeet'] += $attendance->total_hours;
-      }
-    }
+        return [
+          $firstRecord->student_no => [
+            'student' => [
+              'first_name' => $firstRecord->first_name,
+              'last_name' => $firstRecord->last_name,
+            ],
+            'subjects' => $studentActivities
+              ->groupBy('subject_id')
+              ->map(function ($subjectActivities) use ($firstRecord, $attendanceData, $periodsToInclude, $period) {
+                $firstSubjectRecord = $subjectActivities->first();
+                $studentAttendance = $attendanceData[$firstRecord->student_no][$firstSubjectRecord->subject_id] ?? [];
 
-    // Populate activities data
-    foreach ($activities as $activity) {
-      if(isset($gradeData[$activity->subject_id]['students'][$activity->student_id])) {
-        $studentPeriod = &$gradeData[$activity->subject_id]['students'][$activity->student_id][$activity->period];
+                // Initialize period grades
+                $periodGrades = [];
+                $finalGrade = 0;
 
-        switch ($activity->type) {
-          case 'activity':
-            $studentPeriod['activities']['score'] = $activity->total_score;
-            $studentPeriod['activities']['total'] = $activity->total_possible;
-            break;
-          case 'quiz':
-            $studentPeriod['quizzes']['score'] = $activity->total_score;
-            $studentPeriod['quizzes']['total'] = $activity->total_possible;
-            break;
-          case $activity->period: // For exams (type matches period)
-            $studentPeriod['exams']['score'] = $activity->total_score;
-            $studentPeriod['exams']['total'] = $activity->total_possible;
-            break;
-        }
-      }
-    }
+                foreach ($periodsToInclude as $currentPeriod) {
+                  $periodActivities = $subjectActivities->where('period', $currentPeriod);
+                  if($periodActivities->count() === 0) {
+                    return null;
+                  }
 
-    // Calculate grades for each subject and student
-    foreach ($gradeData as &$subjectData) {
-      foreach ($subjectData['students'] as &$studentData) {
-        $finalGrade = 0;
+                  $attendance = $studentAttendance[$currentPeriod] ?? ['absences' => 0, 'totalMeet' => 0];
 
-        // Only process periods up to current period
-        $periodsToProcess = array_slice(
-          $periods,
-          0,
-          array_search($currentPeriod, $periods) + 1
-        );
+                  // Calculate category grades
+                  $categoryGrades = [
+                    'attendance' => $this->calculateAttendanceGrade(
+                      $attendance['totalMeet'],
+                      $attendance['absences']
+                    ),
+                    'activity' => $this->calculateComponentGrade(
+                      $periodActivities->where('type', 'activity')->sum('score'),
+                      $periodActivities->where('type', 'activity')->sum('points')
+                    ),
+                    'quiz' => $this->calculateComponentGrade(
+                      $periodActivities->where('type', 'quiz')->sum('score'),
+                      $periodActivities->where('type', 'quiz')->sum('points')
+                    ),
+                    'exam' => $this->calculateComponentGrade(
+                      $periodActivities->where('type', $currentPeriod)->sum('score'),
+                      $periodActivities->where('type', $currentPeriod)->sum('points')
+                    )
+                  ];
 
-        foreach ($periodsToProcess as $period) {
-          $periodData = &$studentData[$period];
+                  // Calculate period grade with category weights
+                  $periodGrade = 0;
+                  foreach (self::CATEGORY_WEIGHTS as $category => $weight) {
+                    $periodGrade += $categoryGrades[$category] * $weight;
+                  }
 
-          // Calculate category grades
-          $categoryGrades = [
-            'attendance' => $this->calculateAttendanceGrade(
-              $periodData['attendances']['totalMeet'] ?? 0,
-              $periodData['attendances']['absences'] ?? 0
-            ),
-            'activity' => $this->calculateComponentGrade(
-              $periodData['activities']['score'] ?? 0,
-              $periodData['activities']['total'] ?? 0
-            ),
-            'quiz' => $this->calculateComponentGrade(
-              $periodData['quizzes']['score'] ?? 0,
-              $periodData['quizzes']['total'] ?? 0
-            ),
-            'exam' => $this->calculateComponentGrade(
-              $periodData['exams']['score'] ?? 0,
-              $periodData['exams']['total'] ?? 0
-            )
-          ];
+                  $periodGrades[$currentPeriod] = [
+                    'categories' => $categoryGrades,
+                    'raw' => round($periodGrade, 2),
+                    'weighted' => round($periodGrade * (self::PERIOD_WEIGHTS[$currentPeriod] / 100), 2),
+                    'numerical' => $this->translateGrade($periodGrade)
+                  ];
 
-          // Calculate period grade with category weights
-          $periodGrade = 0;
-          foreach (self::CATEGORY_WEIGHTS as $category => $weight) {
-            $periodGrade += $categoryGrades[$category] * $weight;
-          }
+                  $finalGrade += $periodGrade * (self::PERIOD_WEIGHTS[$currentPeriod] / 100);
+                }
 
-          // Store detailed grade information
-          $periodData['grades'] = [
-            'categories' => $categoryGrades,
-            'raw' => round($periodGrade, 2),
-            'weighted' => round($periodGrade * (self::PERIOD_WEIGHTS[$period] / 100), 2),
-            'numerical' => $this->translateGrade($periodGrade)
-          ];
-
-          // Add to final grade
-          $finalGrade += $periodGrade * (self::PERIOD_WEIGHTS[$period] / 100);
-        }
-
-        // Add final grade to student data
-        $studentData['final_grade'] = [
-          'raw' => round($finalGrade, 2),
-          'numerical' => $this->translateGrade($finalGrade)
+                return [
+                  'code' => $firstSubjectRecord->subject_code,
+                  'title' => $firstSubjectRecord->subject_name,
+                  'section' => $firstSubjectRecord->section,
+                  'teacher' => [
+                    'first_name' => $firstSubjectRecord->teacher_first_name,
+                    'middle_name' => $firstSubjectRecord->teacher_middle_name,
+                    'last_name' => $firstSubjectRecord->teacher_last_name,
+                    'department' => $firstSubjectRecord->teacher_department
+                  ],
+                  'activities' => $subjectActivities
+                    ->groupBy('activity_id')
+                    ->map(function ($activityRecords) {
+                      $activity = $activityRecords->first();
+                      return [
+                        'id' => $activity->activity_id,
+                        'title' => $activity->activity_title,
+                        'type' => $activity->type,
+                        'period' => $activity->period,
+                        'points' => $activity->points,
+                        'score' => $activity->score
+                      ];
+                    })->values(),
+                  'grades' => [
+                    'periods' => $periodGrades,
+                    'final' => [
+                      'raw' => round($finalGrade, 2),
+                      'numerical' => $this->translateGrade($finalGrade)
+                    ]
+                  ]
+                ];
+              })->filter(function ($subject) {
+                return !is_null($subject);
+              })->values()
+          ]
         ];
-      }
-    }
+      })->filter(function ($student) {
+        return count($student['subjects']) > 0;
+      });
 
-    dd($gradeData);
+    return Inertia::render('Reports/GradeReport', [
+      'report' => $academicReport,
+      'period' => $period
+    ]);
   }
 
   private function initializePeriodStructure(): array
