@@ -63,7 +63,7 @@
             <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold && student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
               <b>{student.last_name}</b>, {student.first_name}
             </td>
-            {#each student.attendances.sort((a, b) => {
+            {#each student.attendances.filter((a) => a.period === $page.props.app.settings.period).sort((a, b) => {
               const dateCompare = a.date.localeCompare(b.date);
               if(dateCompare === 0) {
                 // Secondary comparison by another attribute, for example, date
