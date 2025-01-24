@@ -563,6 +563,10 @@ class ReportController extends Controller {
 
                 foreach ($periodsToInclude as $currentPeriod) {
                   $periodActivities = $subjectActivities->where('period', $currentPeriod);
+                  if($periodActivities->count() === 0) {
+                    return null;
+                  }
+
                   $attendance = $studentAttendance[$currentPeriod] ?? ['absences' => 0, 'totalMeet' => 0];
 
                   // Calculate category grades
