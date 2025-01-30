@@ -94,6 +94,7 @@
         </Card.Root>
       </div>
 
+      {#if $page.props.auth.user.role === 'admin'}
       <Card.Root>
         <Card.Header class="px-7">
           <Card.Title>Reports</Card.Title>
@@ -205,6 +206,7 @@
 <!--          </div>-->
         </Card.Content>
       </Card.Root>
+      {/if}
     </div>
   </main>
 </div>

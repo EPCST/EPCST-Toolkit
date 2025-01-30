@@ -55,7 +55,7 @@ function updateSetting(e) {
         </div>
       </AlertDialog.Content>
     </AlertDialog.Root>
-    <Tooltip.Root>
+    <Tooltip.Root openDelay="0">
       <Tooltip.Trigger asChild let:builder>
         <a
           href="{route('dashboard')}"
@@ -71,7 +71,7 @@ function updateSetting(e) {
       <Tooltip.Content side="right">Dashboard</Tooltip.Content>
     </Tooltip.Root>
     {#if $page.props.auth.user.role !== 'admin'}
-    <Tooltip.Root>
+    <Tooltip.Root openDelay="0">
       <Tooltip.Trigger asChild let:builder>
         <a
           {...builder}
@@ -89,7 +89,7 @@ function updateSetting(e) {
     {/if}
 
     {#if $page.props.auth.user.role !== 'admin'}
-    <Tooltip.Root>
+    <Tooltip.Root openDelay="0">
       <Tooltip.Trigger asChild let:builder>
         <a
           {...builder}
@@ -168,9 +168,9 @@ function updateSetting(e) {
           <p>{$page.props.auth.user.first_name} {$page.props.auth.user.last_name}</p>
           <p class="text-muted-foreground text-xs">{$page.props.auth.user.role.toUpperCase()}</p>
         </DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item>Settings</DropdownMenu.Item>
-        <DropdownMenu.Item>Support</DropdownMenu.Item>
+<!--        <DropdownMenu.Separator />-->
+<!--        <DropdownMenu.Item>Settings</DropdownMenu.Item>-->
+<!--        <DropdownMenu.Item>Support</DropdownMenu.Item>-->
         <DropdownMenu.Separator />
         <DropdownMenu.Item href={route('logout')} class="cursor-pointer">Logout</DropdownMenu.Item>
       </DropdownMenu.Content>
