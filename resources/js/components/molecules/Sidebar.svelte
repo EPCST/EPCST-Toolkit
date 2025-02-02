@@ -48,7 +48,7 @@ function updateSetting(e) {
               <HoverCard.Trigger class="text-orange-500">CS Department</HoverCard.Trigger>
               <HoverCard.Content class="flex gap-2 flex-col">
                 <p>Led by <b>Joseph G. Chua</b></p>
-                <p>Many thanks to the entire CS department faculty for testing and providing feedback.</p>
+                <p>Many thanks to the entire CS department faculty for testing and providing feedbacks.</p>
               </HoverCard.Content>
             </HoverCard.Root>
           </p>
