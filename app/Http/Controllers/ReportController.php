@@ -42,10 +42,74 @@ class ReportController extends Controller {
   }
 
   public function enrollmentReport() {
-    $subjects = Subject::all();
+    $enrollmentData = DB::table('subjects')
+      ->join('users', 'subjects.user_id', '=', 'users.id')
+      ->leftJoin('attendance_student_subject as ass', 'subjects.id', '=', 'ass.subject_id')
+      ->leftJoin('attendances', 'ass.attendance_id', '=', 'attendances.id')
+      ->leftJoin('students', 'ass.student_no', '=', 'students.student_no')
+      ->where('subjects.academic_year_id', Settings::get('academic_year'))
+      ->where(function($query) {
+        $query->where('ass.status', '=', 'present')
+          ->orWhereNull('ass.status'); // Include subjects even if no students present
+      })
+      ->select(
+          'subjects.id as subject_id',
+          'subjects.code as subject_code',
+          'subjects.title as subject_title',
+          'subjects.section',
+          'subjects.units_lec',
+          'subjects.units_lab',
+          'users.id as teacher_id',
+          'users.first_name as teacher_first_name',
+          'users.middle_name as teacher_middle_name',
+          'users.last_name as teacher_last_name',
+          'users.department as teacher_department',
+          'students.student_no',
+          'students.first_name as student_first_name',
+          'students.last_name as student_last_name'
+      )
+      ->distinct()
+      ->get()
+      ->groupBy('teacher_id')
+      ->map(function($teacherSubjects) {
+        $firstRecord = $teacherSubjects->first();
+        return [
+          'teacher' => [
+            'id' => $firstRecord->teacher_id,
+            'first_name' => $firstRecord->teacher_first_name,
+            'middle_name' => $firstRecord->teacher_middle_name,
+            'last_name' => $firstRecord->teacher_last_name,
+            'department' => $firstRecord->teacher_department,
+          ],
+          'subjects' => $teacherSubjects
+            ->groupBy('subject_id')
+            ->map(function($subjectStudents) {
+              $firstSubject = $subjectStudents->first();
+              return [
+                'id' => $firstSubject->subject_id,
+                'code' => $firstSubject->subject_code,
+                'title' => $firstSubject->subject_title,
+                'section' => $firstSubject->section,
+                'units_lec' => $firstSubject->units_lec,
+                'units_lab' => $firstSubject->units_lab,
+                'students' => $subjectStudents
+                  ->filter(function($record) {
+                    return !is_null($record->student_no);
+                  })
+                  ->map(function($record) {
+                    return [
+                      'student_no' => $record->student_no,
+                      'first_name' => $record->student_first_name,
+                      'last_name' => $record->student_last_name,
+                    ];
+                  })->values()->unique('student_no')->values(),
+              ];
+            })->values(),
+        ];
+      })->values();
 
-    return Inertia::render('Reports/EnrollmentReport', [
-      'report' => $subjects
+    return Inertia::render('Reports/Enrollment', [
+      'report' => $enrollmentData
     ]);
   }
 
@@ -141,7 +205,8 @@ class ReportController extends Controller {
                 ->select(
                   'attendances.date',
                   'ass.status',
-                  'ass.hours'
+                  'ass.hours',
+                  'ass.remarks'
                 )
                 ->orderBy('attendances.date', 'desc')
                 ->get();
@@ -160,6 +225,7 @@ class ReportController extends Controller {
                 'absences_before' => (float)$record->absences_before,
                 'absences' => $attendanceRecords->map(function($attendance) {
                   return [
+                    'remarks' => $attendance->remarks,
                     'date' => $attendance->date,
                     'status' => $attendance->status,
                     'hours' => (float)$attendance->hours
