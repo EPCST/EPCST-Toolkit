@@ -9,16 +9,23 @@
   import {Input} from "$lib/components/ui/input/index.js";
   import * as Select from "$lib/components/ui/select/index.js";
   import * as Card from "$lib/components/ui/card/index.js";
-  import {Bird, Rabbit, Turtle} from "lucide-svelte";
+  import * as Sheet from "$lib/components/ui/sheet/index.js";
+
+  import {Bird, Eye, Rabbit, Turtle} from "lucide-svelte";
   import {toast} from "svelte-sonner";
   import {onMount} from "svelte";
+  import {Button} from "$lib/components/ui/button/index.js";
 
   const {report, range} = $props();
+
+  let dialogOpen = $state(false);
 
   // On mount make sure that we initialize Preline JS.
   onMount(() => {
     window.HSStaticMethods.autoInit();
   });
+
+  let studentAttendanceData = $state({});
 
   function getCurrentWeek() {
     if(range.original) {
@@ -78,12 +85,54 @@
     });
   }
 
+  function viewAttendance(data) {
+    studentAttendanceData = data;
+
+    dialogOpen = true;
+  }
+
 
   const {
     semester,
     school_year
   } = $page.props.app.settings.academic_years.filter((a) => a.id === Number($page.props.app.settings.academic_year))[0];
 </script>
+
+<Sheet.Root bind:open={dialogOpen}>
+  <Sheet.Trigger />
+
+  <Sheet.Content side="bottom">
+    <Sheet.Header>
+      <Sheet.Title>Attendance History - {studentAttendanceData['student']['firstName']} {studentAttendanceData['student']['lastName']}</Sheet.Title>
+    </Sheet.Header>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Date</th>
+        <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Status</th>
+        <th scope="col" class="px-6 py-3 text-start text-xs font-bold text-gray-500 uppercase">Remarks</th>
+      </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 border-collapse">
+      {#each (studentAttendanceData['absences'] ?? []).sort((a, b) => {
+        // First, compare by title
+        const titleComparison = a.date.localeCompare(b.date);
+
+        // If titles are not equal, return the comparison result
+        if (titleComparison !== 0) {
+          return titleComparison;
+        }
+      }) as absence, i}
+        <tr>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{absence.date}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{absence.status}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{absence.remarks}</td>
+        </tr>
+      {/each}
+      </tbody>
+    </table>
+  </Sheet.Content>
+</Sheet.Root>
 
 <div class="flex flex-col m-4 sm:pl-14" id="report">
   <div class="bg-gray-200 rounded-sm shadow-md p-4 mb-2 flex flex-col">
@@ -149,7 +198,9 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.absences_this_week}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">{subject.absences_this_week + subject.absences_before}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 border-gray-200 border">
-
+                    <Button onclick={() => viewAttendance({student: student, absences: subject.absences})} variant="outline" size="icon" class="bg-blue-600 hover:bg-blue-700 text-white hover:text-white">
+                      <Eye size={16} class="w-auto"/>
+                    </Button>
                   </td>
                 </tr>
               {/each}

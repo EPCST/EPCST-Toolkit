@@ -141,7 +141,8 @@ class ReportController extends Controller {
                 ->select(
                   'attendances.date',
                   'ass.status',
-                  'ass.hours'
+                  'ass.hours',
+                  'ass.remarks'
                 )
                 ->orderBy('attendances.date', 'desc')
                 ->get();
@@ -162,7 +163,8 @@ class ReportController extends Controller {
                   return [
                     'date' => $attendance->date,
                     'status' => $attendance->status,
-                    'hours' => (float)$attendance->hours
+                    'hours' => (float)$attendance->hours,
+                    'remarks' => $attendance->remarks
                   ];
                 })->values()->toArray()
               ];
