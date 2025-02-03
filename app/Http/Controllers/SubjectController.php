@@ -19,18 +19,32 @@ class SubjectController extends Controller
 
   public function fetchSubjects() {
     try {
-      $response = Http::withHeaders([
+      $subjects = [];
+
+      $i = 1;
+      $subjects[] = Http::withHeaders([
         'accept' => 'application/json',
         'Authorization' => 'Bearer ' . auth()->user()->api_token,
-      ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=1&search=')
-        ->json();
+      ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=' . $i . '&search=')
+        ->json()['data'];
+
+      $ceil = ceil($response['total'] / 10);
+      if($ceil > 1) {
+        for($i = 2; $i <= $ceil; $i++) {
+          $subjects[] = Http::withHeaders([
+            'accept' => 'application/json',
+            'Authorization' => 'Bearer ' . auth()->user()->api_token,
+          ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=' . $ceil . '&search=')
+            ->json()['data'];
+        }
+      }
 
       // Need to refresh the token, use their credentials.
       if(isset($response['message']) && $response['message'] === 'Unauthenticated') {
         // Todo: implement refresh
       }
 
-      foreach($response['data'] as $subject) {
+      foreach($subjects as $subject) {
         Subject::createOrFirst([
           'title' => $subject['title'],
           'section' => $subject['section_name'],
