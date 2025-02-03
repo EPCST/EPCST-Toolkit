@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Native\Laravel\Facades\Settings;
+use Nette\Utils\Arrays;
 
 class SubjectController extends Controller
 {
@@ -19,19 +20,21 @@ class SubjectController extends Controller
 
   public function fetchSubjects() {
     try {
-      $subjects = [];
+      $subjectsList = [];
 
       $i = 1;
-      $subjects[] = Http::withHeaders([
+      $response = Http::withHeaders([
         'accept' => 'application/json',
         'Authorization' => 'Bearer ' . auth()->user()->api_token,
       ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=' . $i . '&search=')
-        ->json()['data'];
+        ->json();
 
-      $ceil = ceil($response['total'] / 10);
+      $subjectsList[] = $response['data'];
+
+      $ceil = (int) ceil($response['total'] / 10);
       if($ceil > 1) {
         for($i = 2; $i <= $ceil; $i++) {
-          $subjects[] = Http::withHeaders([
+          $subjectsList[] = Http::withHeaders([
             'accept' => 'application/json',
             'Authorization' => 'Bearer ' . auth()->user()->api_token,
           ])->get($this->baseUrl . '/teacher/subjects/semesters/' . Settings::get('academic_year') . '?sectionQuery=all&mySubjects=1&page=' . $ceil . '&search=')
@@ -44,14 +47,16 @@ class SubjectController extends Controller
         // Todo: implement refresh
       }
 
-      foreach($subjects as $subject) {
-        Subject::createOrFirst([
-          'title' => $subject['title'],
-          'section' => $subject['section_name'],
-          'subject_id' => $subject['id'],
-          'academic_year_id' => Settings::get('academic_year'),
-          'section_id' => $subject['section_id'],
-        ]);
+      foreach($subjectsList as $subjects) {
+        foreach($subjects as $subject) {
+          Subject::createOrFirst([
+            'title' => $subject['title'],
+            'section' => $subject['section_name'],
+            'subject_id' => $subject['id'],
+            'academic_year_id' => Settings::get('academic_year'),
+            'section_id' => $subject['section_id'],
+          ]);
+        }
       }
 
       $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get()->groupBy('title');
