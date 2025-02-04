@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\DatabaseSyncService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -55,6 +56,10 @@ class AuthController extends Controller {
 
           if(empty(Settings::get('period'))) {
             Settings::set('period', 'prelim');
+          }
+
+          if(empty(Settings::get('last_push_date'))) {
+            Settings::set('last_push_date', Carbon::now());
           }
 
           if(auth()->user()->role === 'admin') {
