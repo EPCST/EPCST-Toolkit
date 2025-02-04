@@ -32,6 +32,31 @@ class AuthController extends Controller {
 
       if($userExists) {
         if(Auth::attempt($formFields)) {
+          // repopulate if unavailable
+          if(empty(Settings::get('academic_years'))) {
+            $academicYears = Http::withHeaders([
+              'accept' => 'application/json',
+              'Authorization' => 'Bearer ' . auth()->user()->api_token,
+            ])->get($this->baseUrl . '/schoolyear')
+              ->json();
+
+            Settings::set('academic_years', $academicYears);
+          }
+
+          if(empty(Settings::get('academic_year'))) {
+            $academicYears = (array) Settings::get('academic_years');
+            Settings::set('academic_year', $academicYears[count($academicYears) - 1]['id']);
+          }
+
+          if(empty(Settings::get('academic_year'))) {
+            $academicYears = (array) Settings::get('academic_years');
+            Settings::set('academic_year', $academicYears[count($academicYears) - 1]['id']);
+          }
+
+          if(empty(Settings::get('period'))) {
+            Settings::set('period', 'prelim');
+          }
+
           if(auth()->user()->role === 'admin') {
             $dbs = new DatabaseSyncService();
             $dbs->syncPull($request);
