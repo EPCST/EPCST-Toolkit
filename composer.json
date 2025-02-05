@@ -47,6 +47,10 @@
     "post-update-cmd": [
       "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
     ],
+    "post-install-cmd": [
+      "cp .//public//icon.png .//vendor//nativephp//electron//resources//js//build//icon.png",
+      "cp .//public//icon.png .//vendor//nativephp//electron//resources//js//resources//icon.png"
+    ],
     "post-root-package-install": [
       "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
     ],

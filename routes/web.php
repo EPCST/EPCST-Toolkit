@@ -36,7 +36,7 @@ Route::middleware('auth')->group(function(){
     }
 
     return inertia('Dashboard', [
-      'subjectCount' => Subject::count(),
+      'subjectCount' => Subject::where('academic_year_id', Settings::get('academic_year'))->count(),
       'lastSync' => $lastSync,
       ...$extra
     ]);
