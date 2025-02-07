@@ -51,9 +51,15 @@ class ReportController extends Controller {
 
   public function subjectLoading()
   {
-    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->where('role', User::ROLE_TEACHER)->get()->toArray();
     $subjects = Subject::where('academic_year_id', Settings::get('academic_year'))->get();
 
+    if(request()->user()->role === 'teacher') {
+      return Inertia::render('Reports/Teacher/SubjectLoading', [
+        'report' => $subjects,
+      ]);
+    }
+
+    $teachers = User::select(['id', 'first_name', 'middle_name', 'last_name', 'email'])->where('role', User::ROLE_TEACHER)->get()->toArray();
     return Inertia::render('Reports/SubjectLoading', [
       'report' => $subjects->groupBy('user_id'),
       'teachers' => $teachers
