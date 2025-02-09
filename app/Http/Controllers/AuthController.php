@@ -62,9 +62,12 @@ class AuthController extends Controller {
             Settings::set('last_push_date', Carbon::now());
           }
 
+          $dbs = new DatabaseSyncService();
           if(auth()->user()->role === 'admin') {
-            $dbs = new DatabaseSyncService();
             $dbs->syncPull($request);
+          }
+          else if(auth()->user()->role === 'teacher') {
+            $dbs->sync($request);
           }
 
           return redirect()->route('dashboard');
