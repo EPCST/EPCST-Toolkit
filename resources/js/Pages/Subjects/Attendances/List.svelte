@@ -55,15 +55,16 @@
         </thead>
         <tbody>
         {#each subject.students as student, i}
-          {@const studentTotalAbsences = student.attendances.reduce((acc, cur) => acc + (cur.pivot.hours || 0), 0)}
-          {@const studentTotalPresent = student.attendances.reduce((acc, cur) => acc + (cur.hours || 0), 0)}
+          {@const studentAttendances = student.attendances.filter((a) => a.period === $page.props.app.settings.period && a.academic_year_id === Number($page.props.app.settings.academic_year) && a.pivot.subject_id === subject.id) }
+          {@const studentTotalAbsences = studentAttendances.reduce((acc, cur) => acc + (cur.pivot.hours || 0), 0)}
+          {@const studentTotalPresent = studentAttendances.reduce((acc, cur) => acc + (cur.hours || 0), 0)}
           {@const status = student.pivot.status.toUpperCase()}
 
           <tr class="student-attendance">
             <td class="p-2 border border-gray-400 {studentTotalAbsences >= subject.dropout_threshold && student.pivot.status === 'dropped' ? 'bg-red-400 text-white' : 'bg-gray-200'} sticky max-w-[256px] min-w-[256px] text-nowrap overflow-ellipsis overflow-hidden left-0 z-10">
               <b>{student.last_name}</b>, {student.first_name}
             </td>
-            {#each student.attendances.filter((a) => a.period === $page.props.app.settings.period).sort((a, b) => {
+            {#each studentAttendances.sort((a, b) => {
               const dateCompare = a.date.localeCompare(b.date);
               if(dateCompare === 0) {
                 // Secondary comparison by another attribute, for example, date
