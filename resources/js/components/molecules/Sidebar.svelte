@@ -88,23 +88,23 @@ function updateSetting(e) {
     </Tooltip.Root>
     {/if}
 
-    {#if $page.props.auth.user.role !== 'admin'}
-    <Tooltip.Root openDelay="0">
-      <Tooltip.Trigger asChild let:builder>
-        <a
-          {...builder}
-          class="{$page.url.indexOf('/reports') !== -1 ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"
-          href={route('reports.index')}
-          use:builder.action
-          use:inertia
-        >
-          <FileSpreadsheet class="h-5 w-5" />
-          <span class="sr-only">Reports</span>
-        </a>
-      </Tooltip.Trigger>
-      <Tooltip.Content side="right">Reports</Tooltip.Content>
-    </Tooltip.Root>
-    {/if}
+    <!--{#if $page.props.auth.user.role !== 'admin'}-->
+    <!--<Tooltip.Root openDelay="0">-->
+    <!--  <Tooltip.Trigger asChild let:builder>-->
+    <!--    <a-->
+    <!--      {...builder}-->
+    <!--      class="{$page.url.indexOf('/reports') !== -1 ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}  hover:text-foreground flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8"-->
+    <!--      href={route('reports.index')}-->
+    <!--      use:builder.action-->
+    <!--      use:inertia-->
+    <!--    >-->
+    <!--      <FileSpreadsheet class="h-5 w-5" />-->
+    <!--      <span class="sr-only">Reports</span>-->
+    <!--    </a>-->
+    <!--  </Tooltip.Trigger>-->
+    <!--  <Tooltip.Content side="right">Reports</Tooltip.Content>-->
+    <!--</Tooltip.Root>-->
+    <!--{/if}-->
 <!--    <Tooltip.Root>-->
 <!--      <Tooltip.Trigger asChild let:builder>-->
 <!--        <a-->

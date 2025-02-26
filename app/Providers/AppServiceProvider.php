@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
       // Create SQLite databases in /database folder
       $databasePath = database_path();
-        
+
       // Create remote.sqlite if it doesn't exist
       $remotePath = $databasePath . '/nativephp.sqlite';
       if (!file_exists($remotePath)) {
