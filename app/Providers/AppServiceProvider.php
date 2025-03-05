@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
       $databasePath = database_path();
 
       // Create remote.sqlite if it doesn't exist
-      $remotePath = $databasePath . '/nativephp.sqlite';
+      $remotePath = $databasePath . '/database.sqlite';
       if (!file_exists($remotePath)) {
         file_put_contents($remotePath, '');
         chmod($remotePath, 0755);
