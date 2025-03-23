@@ -498,6 +498,7 @@ class ReportController extends Controller {
         'attendances.period',
         'ass.status',
         DB::raw('SUM(ass.hours) as total_hours'),
+        DB::Raw('SUM(attendances.hours) as meet_hours'),
         DB::raw('COUNT(*) as total_meetings')
       )
       ->groupBy('ass.student_no', 'ass.subject_id', 'attendances.period', 'ass.status')
@@ -507,8 +508,8 @@ class ReportController extends Controller {
         return $records->groupBy('subject_id')->map(function($subjectRecords) {
           return $subjectRecords->groupBy('period')->map(function($periodRecords) {
             return [
-              'absences' => $periodRecords->where('status', 'absent')->sum('total_hours'),
-              'totalMeet' => $periodRecords->sum('total_hours')
+              'absences' => $periodRecords->sum('total_hours'),
+              'totalMeet' => $periodRecords->sum('meet_hours')
             ];
           });
         });
@@ -678,13 +679,13 @@ class ReportController extends Controller {
   private function calculateAttendanceGrade(float $totalMeet, float $absences): float
   {
     if ($totalMeet == 0) return 0;
-    return (($totalMeet - $absences) / $totalMeet) * 100;
+    return (($totalMeet - $absences) / $totalMeet) * 50 + 50;
   }
 
   private function calculateComponentGrade(float $score, float $total): float
   {
     if ($total == 0) return 0;
-    return ($score / $total) * 100;
+    return ($score / $total) * 50 + 50;
   }
 
   private function translateGrade(float $score): float
